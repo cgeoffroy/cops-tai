@@ -7,6 +7,10 @@ import javax.ws.rs.ext.MessageBodyReader;
 import javax.ws.rs.ext.MessageBodyWriter;
 
 import org.codehaus.jackson.jaxrs.JacksonJsonProvider;
+import org.tai.cops.minimal.resources.BenchResource;
+import org.tai.cops.minimal.resources.JacksonResource;
+import org.tai.cops.minimal.resources.PlacementResource;
+import org.tai.cops.minimal.resources.SampleResource;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
