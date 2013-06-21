@@ -29,6 +29,7 @@ public class SampleConfig extends GuiceServletContextListener {
                 bind(BenchResource.class);
                 bind(SampleResource.class);
                 bind(JacksonResource.class);
+                bind(PlacementResource.class);
 
                 /* bind jackson converters for JAXB/JSON serialization */
                 bind(MessageBodyReader.class).to(JacksonJsonProvider.class);
