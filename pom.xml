@@ -3,10 +3,11 @@
 	 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <groupId>com.g414.j4</groupId>
+  <groupId>org.tai</groupId>
   <artifactId>cops-tai</artifactId>
   <version>0.1.0</version>
   <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <jetty.version>[9.0.0,)</jetty.version>
     <jersey.version>1.17.1</jersey.version>
     <jackson.version>1.9.6</jackson.version>
@@ -136,8 +137,8 @@
       <plugin>
 	<artifactId>maven-compiler-plugin</artifactId>
 	<configuration>
-	  <source>1.6</source>
-	  <target>1.6</target>
+	  <source>1.7</source>
+	  <target>1.7</target>
 	</configuration>
       </plugin>
       <plugin>
@@ -176,7 +177,7 @@
 	      <mainClass>org.tai.cops.minimal.Main</mainClass>
 	    </manifest>
 	  </archive>
-	  <finalName>minimal</finalName>
+	  <finalName>cops-tai</finalName>
 	</configuration>
       </plugin>
     </plugins>
