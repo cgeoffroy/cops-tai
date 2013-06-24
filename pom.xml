@@ -203,7 +203,7 @@
 	    <manifest>
 	      <addClasspath>true</addClasspath>
 	      <classpathPrefix>lib/</classpathPrefix>
-	      <mainClass>org.tai.cops.minimal.Main</mainClass>
+	      <mainClass>org.tai.cops.server.Main</mainClass>
 	    </manifest>
 	  </archive>
 	  <finalName>cops-tai</finalName>

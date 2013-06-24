@@ -1,4 +1,4 @@
-package org.tai.cops.minimal;
+package org.tai.cops.server;
 
 import java.io.IOException;
 
