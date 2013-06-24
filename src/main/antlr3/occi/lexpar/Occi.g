@@ -223,24 +223,15 @@ scheme_attr            returns [String value] :
 	                       ;
 
 klass_attr             returns [String value] :
-	                       ';' 'class' '='
-	                       (QUOTED_VALUE {
-
-	                         String klass = removeQuotes($QUOTED_VALUE.text);
-
-	                         if(!(klass.equals(occi_core_class_kind) || klass.equals(occi_core_class_mixin) ||
-	                               klass.equals(occi_core_class_action))){
-	                           System.out.println("the 'class' attribute's value can only be ['kind', 'mixin', 'action']");
-	                           //throw new OcciParserException("the 'class' attribute's value can only be ['kind', 'mixin', 'action']");
-	                         }
-	                         $value = klass;
-	                       }
-                           | HACK_CLASS {
-                             String klass = $QUOTED_VALUE.text;
-                             $value = klass;
-                           }) 
-
-	                       ;
+	                       ';' 'class' '=' (
+                             c1=CLASS_VALUE {
+                               $value = removeQuotes($c1.text);
+                             }
+                           | QUOTE c2=CLASS_VALUE QUOTE {
+                               $value = removeQuotes($c2.text);
+                             }
+                           )
+                           ;
 
 title_attr             returns [String value] :
 	                       ';' 'title' '='
@@ -441,7 +432,7 @@ location_values        returns [ArrayList urls]:
 	                       )*
 	                       ;
 
-HACK_CLASS    : ('kind' | 'mixin' | 'action');
+CLASS_VALUE   : ('kind' | 'mixin' | 'action');
 URL           : ( 'http://' | 'https://' )( 'a'..'z' | 'A'..'Z' | '0'..'9' | '@' | ':' | '%' | '_' | '\\' | '+' | '.' | '~' | '#' | '?' | '&' | '/' | '=' | '-')*;
 DIGITS        : ('0'..'9')* ;
 FLOAT         : ('0'..'9' | '.')* ;
