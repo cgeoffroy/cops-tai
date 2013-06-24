@@ -184,7 +184,7 @@ category_values        returns [ArrayList cats] :
 	                       ;
 
 category_value         returns [HashMap cat] :
-	                       term_attr scheme_attr klass_attr title_attr? rel_attr? c_attributes_attr? location_attr? actions_attr?{
+	                       term_attr scheme_attr klass_attr title_attr? rel_attr? c_attributes_attr? actions_attr? location_attr? {
 	                         $cat = new HashMap();
 
 	                         $cat.put(occi_core_term, $term_attr.value);
@@ -253,7 +253,7 @@ rel_attr               returns [String value] :
 location_attr          returns [String value] :
 	                       ';' 'location' '='
 	                       QUOTED_VALUE{
-	                         $value = $QUOTED_VALUE.text;
+	                         $value = removeQuotes($QUOTED_VALUE.text);
 	                       }
 	                       ;
 
@@ -437,7 +437,7 @@ URL           : ( 'http://' | 'https://' )( 'a'..'z' | 'A'..'Z' | '0'..'9' | '@'
 DIGITS        : ('0'..'9')* ;
 FLOAT         : ('0'..'9' | '.')* ;
 QUOTE         : '"' | '\'' ;
-TERM_VALUE    : ('a'..'z' | 'A..Z' | '0'..'9' | '-' | '_' | '.')* ;
+TERM_VALUE    : ('a'..'z' | 'A'..'Z' | '0'..'9' | '-' | '_' | '.')* ;
 TARGET_VALUE  : ('a'..'z' | 'A'..'Z' | '0'..'9' | '/' | '-' | '_')* ;
 QUOTED_VALUE  : QUOTE ( options {greedy=false;} : . )* QUOTE ;
 WS  :   ( ' ' | '\t' | '\r' | '\n' ) {$channel=HIDDEN;} ;
