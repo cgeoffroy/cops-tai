@@ -1,6 +1,7 @@
 package org.tai.cops.server;
 
 
+import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
@@ -10,8 +11,6 @@ import javax.servlet.DispatcherType;
 
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
-import org.eclipse.jetty.util.log.Logger;
-import org.eclipse.jetty.util.log.LoggerLog;
 import org.tai.cops.occi.ERenderingStructures;
 
 import com.google.inject.servlet.GuiceFilter;
@@ -19,6 +18,9 @@ import com.google.inject.servlet.GuiceFilter;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import occi.lexpar.OcciParser;
 
@@ -40,7 +42,10 @@ public class Main {
 		return buffer.toString();
 	}
 	
+	final static Logger logger = LoggerFactory.getLogger(Main.class);
+	
     public static void main(String[] args) throws Exception {
+    	
         Server server = new Server(8080);
         ServletContextHandler root = new ServletContextHandler(server, "/", ServletContextHandler.SESSIONS);
 
@@ -51,15 +56,18 @@ public class Main {
         Client client = Client.create();
         
 		WebResource webResource = client.resource(PUBLISHER_URL + "/-/");
-		System.out.println("Main.main() connecting to publisher");
+		
+		logger.debug("connecting to publisher");
 		ClientResponse response = webResource.accept("text/occi").type("text/occi")
                    .get(ClientResponse.class);
-        System.out.println("Main.main() got a response");
 		
-        String occiHeaders = rebuildOcciHeaders(response.getHeaders()); 
-		System.out.println("Main.main() : " + occiHeaders);
-		System.out.println("response = " +
-				OcciParser.getParser(occiHeaders).category().toString());
+		logger.debug("rebuilding occi headers with the response");		
+        String occiHeaders = rebuildOcciHeaders(response.getHeaders());
+        logger.debug("rebuild result:\n" + occiHeaders);
+        
+        OcciParser op = OcciParser.getParser(occiHeaders);
+        ArrayList<Float> cats = (ArrayList<Float>) op.category();
+		logger.debug("parsed catogories: " + cats.toString());
 		
         server.start();
     }
