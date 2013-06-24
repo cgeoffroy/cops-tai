@@ -1,4 +1,4 @@
-package org.tai.cops.minimal.resources;
+package org.tai.cops.server.resources;
 
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;

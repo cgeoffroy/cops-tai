@@ -1,4 +1,4 @@
-package org.tai.cops.minimal.resources;
+package org.tai.cops.server.resources;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
