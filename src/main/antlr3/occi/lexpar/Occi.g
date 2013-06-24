@@ -138,12 +138,12 @@ headers                returns [HashMap value] :
                            ArrayList attrList = new ArrayList();
                            ArrayList locList = new ArrayList();
                          }
-                         (
+                         ((
                            category  { if($category.cats != null) catList.add($category.cats); } |
                            link      { if($link.link != null) linkList.add($link.link); } |
                            attribute { if($attribute.attrs != null) attrList.add($attribute.attrs); } |
                            location  { if($location.urls != null) locList.add($location.urls); }
-                         )*
+                         ) (EOF | '\n') )*
                          {
                            $value.put(occi_categories, catList);
                            $value.put(occi_links, linkList);
@@ -184,7 +184,7 @@ category_values        returns [ArrayList cats] :
 	                       ;
 
 category_value         returns [HashMap cat] :
-	                       term_attr scheme_attr klass_attr title_attr? rel_attr? location_attr? c_attributes_attr? actions_attr?{
+	                       term_attr scheme_attr klass_attr title_attr? rel_attr? c_attributes_attr? location_attr? actions_attr?{
 	                         $cat = new HashMap();
 
 	                         $cat.put(occi_core_term, $term_attr.value);
@@ -252,8 +252,8 @@ rel_attr               returns [String value] :
 //this value can be passed on to the uri rule in Location for validation
 location_attr          returns [String value] :
 	                       ';' 'location' '='
-	                       TARGET_VALUE{
-	                         $value = $TARGET_VALUE.text;
+	                       QUOTED_VALUE{
+	                         $value = $QUOTED_VALUE.text;
 	                       }
 	                       ;
 

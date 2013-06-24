@@ -3,6 +3,7 @@ package org.tai.cops.server;
 
 import java.util.ArrayList;
 import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -66,8 +67,9 @@ public class Main {
         logger.debug("rebuild result:\n" + occiHeaders);
         
         OcciParser op = OcciParser.getParser(occiHeaders);
-        ArrayList<Float> cats = (ArrayList<Float>) op.category();
-		logger.debug("parsed catogories: " + cats.toString());
+        Map<String, ArrayList<String>> hs = op.headers();
+		logger.debug("parsed {} catogories: {}", hs.get(OcciParser.occi_categories).size(),
+				hs.get(OcciParser.occi_categories).toString());
 		
         server.start();
     }
