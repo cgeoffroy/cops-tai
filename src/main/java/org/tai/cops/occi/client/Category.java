@@ -1,13 +1,11 @@
 package org.tai.cops.occi.client;
 
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Map;
 
 import javax.annotation.Nonnull;
 
-import org.apache.commons.io.FilenameUtils;
 
 public class Category {
 
@@ -23,13 +21,13 @@ public class Category {
 	
 	
 	private Category(@Nonnull String term, @Nonnull URI scheme, @Nonnull String claz,
-			String title, URI rel, URI location, Map<String, String> attributes,
+			String title, TypeIdentifier rel, URI location, Map<String, String> attributes,
 			String actions) {
 		this.term = term;
 		this.scheme = scheme;
 		this.claz = claz;
 		this.title = title;
-		this.rel = new TypeIdentifier(rel);
+		this.rel = rel;
 		this.location = location;
 		this.attributes = attributes;
 		this.actions = actions;
@@ -40,22 +38,5 @@ public class Category {
 				new URI(parsedValues.get("occi.core.scheme")),
 				parsedValues.get("occi.core.class")	);	
 	}*/
-	
-	private class TypeIdentifier {
-		public final URI scheme;
-		public final String term;
-	
-		public TypeIdentifier(URI ti) {
-			this.term = FilenameUtils.getName(ti.toString());
-			URI tmp = null;
-			try {
-				tmp = new URI(FilenameUtils.getFullPath(ti.toString()));
-			} catch (URISyntaxException e) {
-				e.printStackTrace();
-				assert false; // impossible, it was an URI at the beginning
-			}
-			this.scheme = tmp;
-		}
-	}
 	
 }

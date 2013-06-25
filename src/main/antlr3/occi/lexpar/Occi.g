@@ -42,6 +42,8 @@ options {
     import java.net.URI;
     import java.net.URISyntaxException;
     import antlr.SemanticException;
+    
+    import org.tai.cops.occi.client.TypeIdentifier;
 }
 
 @lexer::header {
@@ -200,7 +202,7 @@ category_value         returns [Map<String, String> cat] :
                               $cat.put(occi_core_title, $title_attr.value);
 
                            if($rel_attr.value != null)
-                              $cat.put(occi_core_rel, $rel_attr.value);
+                              $cat.put(occi_core_rel, $rel_attr.value.toString());
 
                            if($location_attr.value != null)
                               $cat.put(occi_core_location, $location_attr.value);
@@ -245,10 +247,9 @@ title_attr             returns [String value] :
 	                       ;
 
 //this value can be passed on to the uri rule in Location for validation
-rel_attr               returns [String value] :
-	                       ';' 'rel' '='
-	                       QUOTED_VALUE{
-	                         $value = removeQuotes($QUOTED_VALUE.text);
+rel_attr               returns [TypeIdentifier value] :
+	                       ';' 'rel' '=' quoted_uri {
+	                         $value = new TypeIdentifier($quoted_uri.uri);
 	                       }
 	                       ;
 
