@@ -19,12 +19,12 @@ public class Category {
 	private TypeIdentifier rel;
 	private URI location;
 	private Map<String, String> attributes;
-	private List<TypeIdentifier> actions;
+	private String actions;
 	
 	
 	private Category(@Nonnull String term, @Nonnull URI scheme, @Nonnull String claz,
 			String title, URI rel, URI location, Map<String, String> attributes,
-			List<TypeIdentifier> actions) {
+			String actions) {
 		this.term = term;
 		this.scheme = scheme;
 		this.claz = claz;
