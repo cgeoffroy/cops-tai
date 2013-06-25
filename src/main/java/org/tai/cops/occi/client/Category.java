@@ -20,7 +20,7 @@ public class Category {
 	private final String actions;
 	
 	
-	private Category(@Nonnull String term, @Nonnull URI scheme, @Nonnull String claz,
+	public Category(@Nonnull String term, @Nonnull URI scheme, @Nonnull String claz,
 			String title, TypeIdentifier rel, URI location, String attributes,
 			String actions) {
 		this.term = term;

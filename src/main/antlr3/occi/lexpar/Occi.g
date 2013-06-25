@@ -44,6 +44,7 @@ options {
     import antlr.SemanticException;
     
     import org.tai.cops.occi.client.TypeIdentifier;
+    import org.tai.cops.occi.client.Category;
 }
 
 @lexer::header {
@@ -140,7 +141,7 @@ options {
 headers                returns [HashMap value] :
                          {
                            $value = new HashMap();
-                           List<List<Map<String, String>>> catList = new ArrayList();
+                           List<List<Category>> catList = new ArrayList();
                            ArrayList linkList = new ArrayList();
                            ArrayList attrList = new ArrayList();
                            ArrayList locList = new ArrayList();
@@ -171,14 +172,14 @@ headers                returns [HashMap value] :
     actions="http://schemas.ogf.org/occi/infrastructure/storage/action#resize"
 */
 
-category               returns [List<Map<String, String>> cats] :
+category               returns [List<Category> cats] :
                          'Category' ':'
                          category_values ';'?{
                            $cats = $category_values.cats;
                          }
                          ;
 
-category_values        returns [List<Map<String, String>> cats] :
+category_values        returns [List<Category> cats] :
 	                       cv1=category_value{
 	                         $cats = new ArrayList();
 	                         $cats.add($cv1.cat);
@@ -190,11 +191,14 @@ category_values        returns [List<Map<String, String>> cats] :
 	                       )*
 	                       ;
 
-category_value         returns [Map<String, String> cat] :
+category_value         returns [Category cat] :
 	                       term_attr scheme_attr klass_attr title_attr? rel_attr? c_attributes_attr? actions_attr? location_attr? {
-	                         $cat = new HashMap();
+	                         $cat = new Category($term_attr.value, $scheme_attr.value, $klass_attr.value,
+	                         	$title_attr.value, $rel_attr.value, /*$location_attr.value*/null,
+	                         	$c_attributes_attr.value, $actions_attr.value);
+	                         
 
-	                         $cat.put(occi_core_term, $term_attr.value);
+	                    /*     $cat.put(occi_core_term, $term_attr.value);
 	                         $cat.put(occi_core_scheme, $scheme_attr.value.toString());
 	                         $cat.put(occi_core_class, $klass_attr.value);
 
@@ -211,7 +215,7 @@ category_value         returns [Map<String, String> cat] :
                               $cat.put(occi_core_attributes, $c_attributes_attr.value);
 
                            if($actions_attr.value != null)
-                              $cat.put(occi_core_actions, $actions_attr.value);
+                              $cat.put(occi_core_actions, $actions_attr.value);*/
 	                       }
                          ;
 
