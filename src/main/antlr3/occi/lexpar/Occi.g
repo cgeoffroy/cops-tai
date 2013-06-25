@@ -33,10 +33,15 @@ options {
 
 @header {
     package occi.lexpar;
+    import java.util.List;
+    import java.util.Map;
     import java.util.HashMap;
     import java.util.ArrayList;
     import java.math.BigDecimal;
     import java.math.BigInteger;
+    import java.net.URI;
+    import java.net.URISyntaxException;
+    import antlr.SemanticException;
 }
 
 @lexer::header {
@@ -133,7 +138,7 @@ options {
 headers                returns [HashMap value] :
                          {
                            $value = new HashMap();
-                           ArrayList catList = new ArrayList();
+                           List<List<Map<String, String>>> catList = new ArrayList();
                            ArrayList linkList = new ArrayList();
                            ArrayList attrList = new ArrayList();
                            ArrayList locList = new ArrayList();
@@ -164,14 +169,14 @@ headers                returns [HashMap value] :
     actions="http://schemas.ogf.org/occi/infrastructure/storage/action#resize"
 */
 
-category               returns [ArrayList cats] :
+category               returns [List<Map<String, String>> cats] :
                          'Category' ':'
                          category_values ';'?{
                            $cats = $category_values.cats;
                          }
                          ;
 
-category_values        returns [ArrayList cats] :
+category_values        returns [List<Map<String, String>> cats] :
 	                       cv1=category_value{
 	                         $cats = new ArrayList();
 	                         $cats.add($cv1.cat);
@@ -183,12 +188,12 @@ category_values        returns [ArrayList cats] :
 	                       )*
 	                       ;
 
-category_value         returns [HashMap cat] :
+category_value         returns [Map<String, String> cat] :
 	                       term_attr scheme_attr klass_attr title_attr? rel_attr? c_attributes_attr? actions_attr? location_attr? {
 	                         $cat = new HashMap();
 
 	                         $cat.put(occi_core_term, $term_attr.value);
-	                         $cat.put(occi_core_scheme, $scheme_attr.value);
+	                         $cat.put(occi_core_scheme, $scheme_attr.value.toString());
 	                         $cat.put(occi_core_class, $klass_attr.value);
 
                            if($title_attr.value !=null)
@@ -215,10 +220,14 @@ term_attr              returns [String value] :
 	                       ;
 
 //this value can be passed on to the uri rule in Location for validation
-scheme_attr            returns [String value] :
+scheme_attr            returns [URI value]:// throws SemanticException:
 	                       ';' 'scheme' '='
 	                       QUOTED_VALUE{
-	                         $value = removeQuotes($QUOTED_VALUE.text);
+	                         try {
+	                           $value = new URI(removeQuotes($QUOTED_VALUE.text));
+	                         } catch (URISyntaxException z) {
+	                         	throw (new RuntimeException(new SemanticException(z.toString())));
+	                         }
 	                       }
 	                       ;
 
@@ -432,6 +441,15 @@ location_values        returns [ArrayList urls]:
 	                       )*
 	                       ;
 
+quoted_uri    returns [URI uri] throws SemanticException:
+	QUOTED_VALUE {
+		try {
+	    	$uri = new URI(removeQuotes($QUOTED_VALUE.text));
+	    } catch (URISyntaxException z) {
+	    	throw new SemanticException(z.toString());
+	    }
+	};
+	
 CLASS_VALUE   : ('kind' | 'mixin' | 'action');
 URL           : ( 'http://' | 'https://' )( 'a'..'z' | 'A'..'Z' | '0'..'9' | '@' | ':' | '%' | '_' | '\\' | '+' | '.' | '~' | '#' | '?' | '&' | '/' | '=' | '-')*;
 DIGITS        : ('0'..'9')* ;

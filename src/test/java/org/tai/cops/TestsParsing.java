@@ -4,6 +4,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import occi.lexpar.OcciParser;
@@ -29,10 +30,10 @@ public class TestsParsing {
 		
 		OcciParser op = OcciParser.getParser(input);
 		
-		ArrayList cats = op.category();
+		List<Map<String, String>> cats = op.category();
 		assertEquals(cats.size(), 1);
 		
-		HashMap cat = (HashMap) cats.get(0);
+		Map<String, String> cat = cats.get(0);
 		assertEquals(true, cat.containsKey("occi.core.term"));
 		assertEquals(cat.get("occi.core.term"), "publication");
 		assertEquals(true, cat.containsKey("occi.core.scheme"));
