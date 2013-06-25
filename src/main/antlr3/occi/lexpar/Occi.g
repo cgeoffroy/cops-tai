@@ -194,7 +194,7 @@ category_values        returns [List<Category> cats] :
 category_value         returns [Category cat] :
 	                       term_attr scheme_attr klass_attr title_attr? rel_attr? c_attributes_attr? actions_attr? location_attr? {
 	                         $cat = new Category($term_attr.value, $scheme_attr.value, $klass_attr.value,
-	                         	$title_attr.value, $rel_attr.value, /*$location_attr.value*/null,
+	                         	$title_attr.value, $rel_attr.value, $location_attr.value,
 	                         	$c_attributes_attr.value, $actions_attr.value);
 	                         
 
@@ -259,10 +259,9 @@ rel_attr               returns [TypeIdentifier value] :
 
 
 //this value can be passed on to the uri rule in Location for validation
-location_attr          returns [String value] :
-	                       ';' 'location' '='
-	                       QUOTED_VALUE{
-	                         $value = removeQuotes($QUOTED_VALUE.text);
+location_attr          returns [URI value] :
+	                       ';' 'location' '=' quoted_uri {
+	                         $value = $quoted_uri.uri;
 	                       }
 	                       ;
 
