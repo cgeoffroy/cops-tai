@@ -16,12 +16,12 @@ public class Category {
 	private String title;
 	private TypeIdentifier rel;
 	private URI location;
-	private Map<String, String> attributes;
+	private String attributes;
 	private String actions;
 	
 	
 	private Category(@Nonnull String term, @Nonnull URI scheme, @Nonnull String claz,
-			String title, TypeIdentifier rel, URI location, Map<String, String> attributes,
+			String title, TypeIdentifier rel, URI location, String attributes,
 			String actions) {
 		this.term = term;
 		this.scheme = scheme;
