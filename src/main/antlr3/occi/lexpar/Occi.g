@@ -221,13 +221,8 @@ term_attr              returns [String value] :
 
 //this value can be passed on to the uri rule in Location for validation
 scheme_attr            returns [URI value]:// throws SemanticException:
-	                       ';' 'scheme' '='
-	                       QUOTED_VALUE{
-	                         try {
-	                           $value = new URI(removeQuotes($QUOTED_VALUE.text));
-	                         } catch (URISyntaxException z) {
-	                         	throw (new RuntimeException(new SemanticException(z.toString())));
-	                         }
+	                       ';' 'scheme' '=' quoted_uri {
+	                         $value = $quoted_uri.uri;
 	                       }
 	                       ;
 
@@ -441,12 +436,12 @@ location_values        returns [ArrayList urls]:
 	                       )*
 	                       ;
 
-quoted_uri    returns [URI uri] throws SemanticException:
+quoted_uri    returns [URI uri]:
 	QUOTED_VALUE {
 		try {
 	    	$uri = new URI(removeQuotes($QUOTED_VALUE.text));
 	    } catch (URISyntaxException z) {
-	    	throw new SemanticException(z.toString());
+	    	throw (new RuntimeException(new SemanticException("Detected an invalid URI: " + z.toString())));
 	    }
 	};
 	
