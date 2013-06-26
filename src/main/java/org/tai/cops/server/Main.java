@@ -10,6 +10,7 @@ import java.util.Map.Entry;
 
 import javax.servlet.DispatcherType;
 
+import org.codehaus.jackson.map.ObjectMapper;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.tai.cops.occi.ERenderingStructures;
@@ -68,8 +69,9 @@ public class Main {
         
         OcciParser op = OcciParser.getParser(occiHeaders);
         Map<String, ArrayList<String>> hs = op.headers();
+        ObjectMapper mapper = new ObjectMapper();
 		logger.debug("parsed {} catogories: {}", hs.get(OcciParser.occi_categories).size(),
-				hs.get(OcciParser.occi_categories).toString());
+				mapper.writeValueAsString(hs.get(OcciParser.occi_categories)));
 		
         server.start();
     }
