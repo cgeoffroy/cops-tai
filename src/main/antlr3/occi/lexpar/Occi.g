@@ -141,13 +141,13 @@ options {
 headers                returns [HashMap value] :
                          {
                            $value = new HashMap();
-                           List<List<Category>> catList = new ArrayList();
+                           List<Category> catList = new ArrayList();
                            ArrayList linkList = new ArrayList();
                            ArrayList attrList = new ArrayList();
                            ArrayList locList = new ArrayList();
                          }
                          ((
-                           category  { if($category.cats != null) catList.add($category.cats); } |
+                           category  { if($category.cats != null) catList.addAll($category.cats); } |
                            link      { if($link.link != null) linkList.add($link.link); } |
                            attribute { if($attribute.attrs != null) attrList.add($attribute.attrs); } |
                            location  { if($location.urls != null) locList.add($location.urls); }

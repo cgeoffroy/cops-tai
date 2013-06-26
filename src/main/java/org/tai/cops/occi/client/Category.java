@@ -33,6 +33,11 @@ public class Category {
 		this.actions = actions;
 	}
 
+	public String getRequestFilter() {
+		return (String.format("%s; scheme=\"%s\"; class=%s; rel=\"%s\"",
+					getTerm(), getScheme(), getClaz(), getRel()));
+	}
+	
 
 	public URI getScheme() {
 		return scheme;
