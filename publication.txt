@@ -1,0 +1,697 @@
+@startuml
+title Swift procci publication setup
+
+actor "Swift" as s
+participant "Publisher" as 8086
+participant "Coobas" as 8091
+participant "Slam" as 8106
+participant "Broker" as 8093 
+
+
+== Initialisation ==
+
+
+s -> s: loading 'swift' section
+note right: in the config file\n (--config accords.xml)
+
+
+s -> 8086: GET http://127.0.0.1:8086/-/
+note right
+	GET /-/ HTTP/1.1
+	Host: 127.0.0.1
+	User-Agent: CO-SWIFTPROCCI/1.0
+	Accept: text/occi
+	Content-Type: text/occi
+end note
+
+
+s <-- 8086: HTTP/1.1 200 OK
+note right of s
+	HTTP/1.1 200 OK
+	Server: CO-PUB/1.0
+	Category: publication; scheme="http://scheme.compatibleone.fr/scheme/compatible#";  
+		class=kind; rel="http://scheme.ogf.org/occi/resource#"; attributes="occi.publication.rating 
+			occi.publication.what occi.publication.remote occi.publication.zone occi.publication.pid 
+			occi.publication.who occi.publication.when occi.publication.uptime occi.publication.state 
+			occi.publication.pass occi.publication.where occi.publication.why occi.publication.identity 
+			occi.publication.operator occi.publication.price"; 
+		actions="http://scheme.compatibleone.fr/scheme/compatible/publication/action#DELETE 
+			http://scheme.compatibleone.fr/scheme/compatible/publication/action#suspend 
+			http://scheme.compatibleone.fr/scheme/compatible/publication/action#restart"; 
+		location="/publication/";
+	Category: DELETE; scheme="http://scheme.compatibleone.fr/scheme/compatible/publication/action#"; 
+		class=action; rel="http://scheme.ogf.org/occi/resource#"; location="/DELETE/";
+	Category: suspend; scheme="http://scheme.compatibleone.fr/scheme/compatible/publication/action#"; 
+		class=action; rel="http://scheme.ogf.org/occi/resource#"; location="/suspend/";
+	Category: restart; scheme="http://scheme.compatibleone.fr/scheme/compatible/publication/action#"; 
+		class=action; rel="http://scheme.ogf.org/occi/resource#"; location="/restart/";
+	Category: enquiry; scheme="http://scheme.compatibleone.fr/scheme/compatible#"; class=kind; 
+		rel="http://scheme.ogf.org/occi/resource#"; 
+		attributes="occi.enquiry.what occi.enquiry.who occi.enquiry.where occi.enquiry.state occi.enquiry.pass"; 
+		actions="http://scheme.compatibleone.fr/scheme/compatible/enquiry/action#DELETE"; location="/enquiry/";
+	Category: DELETE; scheme="http://scheme.compatibleone.fr/scheme/compatible/enquiry/action#"; 
+		class=action; rel="http://scheme.ogf.org/occi/resource#"; location="/DELETE/";
+	Category: operator; scheme="http://scheme.compatibleone.fr/scheme/compatible#"; class=kind; 
+		rel="http://scheme.ogf.org/occi/resource#"; 
+		attributes="occi.operator.pricelist occi.operator.state occi.operator.name occi.operator.description 
+			occi.operator.account occi.operator.security"; 
+		actions="http://scheme.compatibleone.fr/scheme/compatible/operator/action#DELETE"; location="/operator/";
+	Category: DELETE; scheme="http://scheme.compatibleone.fr/scheme/compatible/operator/action#"; class=action; rel="http://scheme.ogf.org/occi/resource#"; location="/DELETE/";
+	Category: agency; scheme="http://scheme.compatibleone.fr/scheme/compatible#"; class=kind; rel="http://scheme.ogf.org/occi/resource#"; attributes="occi.agency.publisher occi.agency.uptime occi.agency.description occi.agency.process occi.agency.start occi.agency.state occi.agency.servicename occi.agency.user occi.agency.password occi.agency.port occi.agency.identity occi.agency.domain"; actions="http://scheme.compatibleone.fr/scheme/compatible/agency/action#DELETE http://scheme.compatibleone.fr/scheme/compatible/agency/action#start http://scheme.compatibleone.fr/scheme/compatible/agency/action#stop"; location="/agency/";
+	Category: DELETE; scheme="http://scheme.compatibleone.fr/scheme/compatible/agency/action#"; class=action; rel="http://scheme.ogf.org/occi/resource#"; location="/DELETE/";
+	Category: start; scheme="http://scheme.compatibleone.fr/scheme/compatible/agency/action#"; class=action; rel="http://scheme.ogf.org/occi/resource#"; location="/start/";
+	Category: stop; scheme="http://scheme.compatibleone.fr/scheme/compatible/agency/action#"; class=action; rel="http://scheme.ogf.org/occi/resource#"; location="/stop/";
+	Category: entity; scheme="http://schemas.ogf.org/core#"; class=kind; rel="http://scheme.ogf.org/occi/entity#"; attributes="occi.entity.id occi.entity.title"; location="/entity/";
+	Category: resource; scheme="http://schemas.ogf.org/core#"; class=kind; rel="http://scheme.ogf.org/occi/resource#"; attributes="occi.resource.summary"; location="/resource/";
+	Category: link; scheme="http://schemas.ogf.org/core#"; class=kind; rel="http://scheme.ogf.org/occi/link#"; attributes="occi.link.source occi.link.target"; location="/link/";
+	Accept: text/occi,text/plain,text/html
+	Content-Type: text/occi
+	Content-Length: 4
+	
+	OK
+end note
+
+
+s -> 8086: GET http://127.0.0.1:8086/publication/
+note right
+GET /publication/ HTTP/1.1
+Host: 127.0.0.1
+User-Agent: CO-SWIFTPROCCI/1.0
+CATEGORY: publication; scheme="http://scheme.compatibleone.fr/scheme/compatible#"; class=kind; rel="http://scheme.ogf.org/occi/resource#";
+X-OCCI-ATTRIBUTE: occi.publication.where="marketplace"
+X-OCCI-ATTRIBUTE: occi.publication.what="provider"
+Accept: text/occi
+Content-Type: text/occi
+end note
+
+
+s <-- 8086: HTTP/1.1 200 OK
+note right
+HTTP/1.1 200 OK
+Server: CO-PUB/1.0
+X-OCCI-Location: http://127.0.0.1:8086/publication/9e082103-543c-4dc7-a220-49fe3141a5f3
+Accept: text/occi,text/plain,text/html
+Content-Type: text/occi
+Content-Length: 4
+
+OK
+end note
+
+
+s -> 8086: GET http://127.0.0.1:8086/publication/9e082103-543c-4dc7-a220-49fe3141a5f3
+note right
+GET /publication/9e082103-543c-4dc7-a220-49fe3141a5f3 HTTP/1.1
+Host: 127.0.0.1
+User-Agent: CO-SWIFTPROCCI/1.0
+CATEGORY: publication; scheme="http://scheme.compatibleone.fr/scheme/compatible#"; class=kind; rel="http://scheme.ogf.org/occi/resource#";
+X-OCCI-ATTRIBUTE: occi.publication.where="marketplace"
+X-OCCI-ATTRIBUTE: occi.publication.what="provider"
+Accept: text/occi
+Content-Type: text/occi
+end note
+
+s <--8086: HTTP/1.1 200 OK
+note right
+HTTP/1.1 200 OK
+Server: CO-PUB/1.0
+X-OCCI-Attribute: occi.core.id="9e082103-543c-4dc7-a220-49fe3141a5f3"
+X-OCCI-Attribute: occi.publication.rating="(null)"
+X-OCCI-Attribute: occi.publication.what="provider"
+X-OCCI-Attribute: occi.publication.remote="(null)"
+X-OCCI-Attribute: occi.publication.zone="europe"
+X-OCCI-Attribute: occi.publication.pid="0"
+X-OCCI-Attribute: occi.publication.who="service-broker"
+X-OCCI-Attribute: occi.publication.when="1372232144"
+X-OCCI-Attribute: occi.publication.uptime="5056"
+X-OCCI-Attribute: occi.publication.state="1"
+X-OCCI-Attribute: occi.publication.pass="co-system"
+X-OCCI-Attribute: occi.publication.where="marketplace"
+X-OCCI-Attribute: occi.publication.why="http://127.0.0.1:8093"
+X-OCCI-Attribute: occi.publication.identity="(null)"
+X-OCCI-Attribute: occi.publication.operator="accords"
+X-OCCI-Attribute: occi.publication.price=""
+Accept: text/occi,text/plain,text/html
+Content-Type: text/occi
+Content-Length: 4
+
+OK
+end note
+
+
+s -> 8086: GET http://127.0.0.1:8086/publication/
+note right
+GET /publication/ HTTP/1.1
+Host: 127.0.0.1
+User-Agent: CO-SWIFTPROCCI/1.0
+CATEGORY: publication; scheme="http://scheme.compatibleone.fr/scheme/compatible#"; class=kind; rel="http://scheme.ogf.org/occi/resource#";
+X-OCCI-ATTRIBUTE: occi.publication.where="marketplace"
+X-OCCI-ATTRIBUTE: occi.publication.what="account"
+Accept: text/occi
+Content-Type: text/occi
+end note
+
+
+s <-- 8086: HTTP/1.1 200 OK
+note right
+HTTP/1.1 200 OK
+Server: CO-PUB/1.0
+X-OCCI-Location: http://127.0.0.1:8086/publication/b6d2572f-f828-45d0-8810-949906ae4ed2
+Accept: text/occi,text/plain,text/html
+Content-Type: text/occi
+Content-Length: 4
+
+OK
+end note
+
+
+s -> 8086: GET http://127.0.0.1:8086/publication/b6d2572f-f828-45d0-8810-949906ae4ed2 
+note right
+GET /publication/b6d2572f-f828-45d0-8810-949906ae4ed2 HTTP/1.1
+Host: 127.0.0.1
+User-Agent: CO-SWIFTPROCCI/1.0
+CATEGORY: publication; scheme="http://scheme.compatibleone.fr/scheme/compatible#"; class=kind; rel="http://scheme.ogf.org/occi/resource#";
+X-OCCI-ATTRIBUTE: occi.publication.where="marketplace"
+X-OCCI-ATTRIBUTE: occi.publication.what="account"
+Accept: text/occi
+Content-Type: text/occi
+end note
+
+
+s <-- 8086: HTTP/1.1 200 OK
+note right
+HTTP/1.1 200 OK
+Server: CO-PUB/1.0
+X-OCCI-Attribute: occi.core.id="b6d2572f-f828-45d0-8810-949906ae4ed2"
+X-OCCI-Attribute: occi.publication.rating="(null)"
+X-OCCI-Attribute: occi.publication.what="account"
+X-OCCI-Attribute: occi.publication.remote="(null)"
+X-OCCI-Attribute: occi.publication.zone="europe"
+X-OCCI-Attribute: occi.publication.pid="0"
+X-OCCI-Attribute: occi.publication.who="service-coobas"
+X-OCCI-Attribute: occi.publication.when="1372232130"
+X-OCCI-Attribute: occi.publication.uptime="5070"
+X-OCCI-Attribute: occi.publication.state="1"
+X-OCCI-Attribute: occi.publication.pass="co-system"
+X-OCCI-Attribute: occi.publication.where="marketplace"
+X-OCCI-Attribute: occi.publication.why="http://127.0.0.1:8091"
+X-OCCI-Attribute: occi.publication.identity="(null)"
+X-OCCI-Attribute: occi.publication.operator="accords"
+X-OCCI-Attribute: occi.publication.price=""
+Accept: text/occi,text/plain,text/html
+Content-Type: text/occi
+Content-Length: 4
+
+OK
+end note
+
+
+s -> 8091: GET http://127.0.0.1:8091/-/
+note right
+GET /-/ HTTP/1.1
+Host: 127.0.0.1
+User-Agent: CO-SWIFTPROCCI/1.0
+Accept: text/occi
+Content-Type: text/occi
+end note
+
+
+s <-- 8091: HTTP/1.1 200 OK
+note right
+HTTP/1.1 200 OK
+Server: CO-BAS/1.0
+Category: account; scheme="http://scheme.compatibleone.fr/scheme/compatible#"; class=kind; rel="http://scheme.ogf.org/occi/resource#"; attributes="occi.account.invoicing occi.account.nature occi.account.number occi.account.legal occi.account.state occi.account.date occi.account.name occi.account.security occi.account.users"; actions="http://scheme.compatibleone.fr/scheme/compatible/account/action#DELETE"; location="/account/";
+Category: DELETE; scheme="http://scheme.compatibleone.fr/scheme/compatible/account/action#"; class=action; rel="http://scheme.ogf.org/occi/resource#"; location="/DELETE/";
+Category: transaction; scheme="http://scheme.compatibleone.fr/scheme/compatible#"; class=kind; rel="http://scheme.ogf.org/occi/resource#"; attributes="occi.transaction.description occi.transaction.reference occi.transaction.when occi.transaction.validity occi.transaction.source occi.transaction.state occi.transaction.type occi.transaction.account occi.transaction.price occi.transaction.authorization"; actions="http://scheme.compatibleone.fr/scheme/compatible/transaction/action#DELETE"; location="/transaction/";
+Category: DELETE; scheme="http://scheme.compatibleone.fr/scheme/compatible/transaction/action#"; class=action; rel="http://scheme.ogf.org/occi/resource#"; location="/DELETE/";
+Category: price; scheme="http://scheme.compatibleone.fr/scheme/compatible#"; class=kind; rel="http://scheme.ogf.org/occi/resource#"; attributes="occi.price.name occi.price.state occi.price.period occi.price.currency occi.price.rate occi.price.units occi.price.fixed occi.price.description occi.price.operator"; actions="http://scheme.compatibleone.fr/scheme/compatible/price/action#DELETE"; location="/price/";
+Category: DELETE; scheme="http://scheme.compatibleone.fr/scheme/compatible/price/action#"; class=action; rel="http://scheme.ogf.org/occi/resource#"; location="/DELETE/";
+Category: invoice; scheme="http://scheme.compatibleone.fr/scheme/compatible#"; class=kind; rel="http://scheme.ogf.org/occi/resource#"; attributes="occi.invoice.grandtotal occi.invoice.document occi.invoice.rate occi.invoice.state occi.invoice.processing occi.invoice.taxe occi.invoice.number occi.invoice.reduction occi.invoice.date occi.invoice.total occi.invoice.account occi.invoice.authorization occi.invoice.transactions"; actions="http://scheme.compatibleone.fr/scheme/compatible/invoice/action#DELETE http://scheme.compatibleone.fr/scheme/compatible/invoice/action#process http://scheme.compatibleone.fr/scheme/compatible/invoice/action#close"; location="/invoice/";
+Category: DELETE; scheme="http://scheme.compatibleone.fr/scheme/compatible/invoice/action#"; class=action; rel="http://scheme.ogf.org/occi/resource#"; location="/DELETE/";
+Category: process; scheme="http://scheme.compatibleone.fr/scheme/compatible/invoice/action#"; class=action; rel="http://scheme.ogf.org/occi/resource#"; location="/process/";
+Category: close; scheme="http://scheme.compatibleone.fr/scheme/compatible/invoice/action#"; class=action; rel="http://scheme.ogf.org/occi/resource#"; location="/close/";
+Category: connection; scheme="http://scheme.compatibleone.fr/scheme/compatible#"; class=kind; rel="http://scheme.ogf.org/occi/resource#"; attributes="occi.connection.start occi.connection.state occi.connection.finish occi.connection.pid occi.connection.name occi.connection.account occi.connection.session occi.connection.monitor occi.connection.probes"; actions="http://scheme.compatibleone.fr/scheme/compatible/connection/action#DELETE http://scheme.compatibleone.fr/scheme/compatible/connection/action#start http://scheme.compatibleone.fr/scheme/compatible/connection/action#stop http://scheme.compatibleone.fr/scheme/compatible/connection/action#capture http://scheme.compatibleone.fr/scheme/compatible/connection/action#consume"; location="/connection/";
+Category: DELETE; scheme="http://scheme.compatibleone.fr/scheme/compatible/connection/action#"; class=action; rel="http://scheme.ogf.org/occi/resource#"; location="/DELETE/";
+Category: start; scheme="http://scheme.compatibleone.fr/scheme/compatible/connection/action#"; class=action; rel="http://scheme.ogf.org/occi/resource#"; location="/start/";
+Category: stop; scheme="http://scheme.compatibleone.fr/scheme/compatible/connection/action#"; class=action; rel="http://scheme.ogf.org/occi/resource#"; location="/stop/";
+Category: capture; scheme="http://scheme.compatibleone.fr/scheme/compatible/connection/action#"; class=action; rel="http://scheme.ogf.org/occi/resource#"; location="/capture/";
+Category: consume; scheme="http://scheme.compatibleone.fr/scheme/compatible/connection/action#"; class=action; rel="http://scheme.ogf.org/occi/resource#"; location="/consume/";
+Category: packet; scheme="http://scheme.compatibleone.fr/scheme/compatible#"; class=kind; rel="http://scheme.ogf.org/occi/resource#"; attributes="occi.packet.finish occi.packet.name occi.packet.sequence occi.packet.start occi.packet.state occi.packet.samples occi.packet.data occi.packet.connection occi.packet.probe occi.packet.metric occi.packet.penalties"; actions="http://scheme.compatibleone.fr/scheme/compatible/packet/action#DELETE"; location="/packet/";
+Category: DELETE; scheme="http://scheme.compatibleone.fr/scheme/compatible/packet/action#"; class=action; rel="http://scheme.ogf.org/occi/resource#"; location="/DELETE/";
+Category: entity; scheme="http://schemas.ogf.org/core#"; class=kind; rel="http://scheme.ogf.org/occi/entity#"; attributes="occi.entity.id occi.entity.title"; location="/entity/";
+Category: resource; scheme="http://schemas.ogf.org/core#"; class=kind; rel="http://scheme.ogf.org/occi/resource#"; attributes="occi.resource.summary"; location="/resource/";
+Category: link; scheme="http://schemas.ogf.org/core#"; class=kind; rel="http://scheme.ogf.org/occi/link#"; attributes="occi.link.source occi.link.target"; location="/link/";
+Accept: text/occi,text/plain,text/html
+Content-Type: text/occi
+Content-Length: 4
+
+OK
+end note
+
+
+s -> 8091: GET http://127.0.0.1:8091/account/
+note right
+GET /account/ HTTP/1.1
+Host: 127.0.0.1
+User-Agent: CO-SWIFTPROCCI/1.0
+CATEGORY: account; scheme="http://scheme.compatibleone.fr/scheme/compatible#"; class=kind; rel="http://scheme.ogf.org/occi/resource#";
+X-OCCI-ATTRIBUTE: occi.account.name="accords"
+Accept: text/occi
+Content-Type: text/occi
+end note
+
+
+s <-- 8091: HTTP/1.1 200 OK
+note right
+HTTP/1.1 200 OK
+Server: CO-BAS/1.0
+X-OCCI-Location: http://127.0.0.1:8091/account/142d3c1b-c8f0-412d-925c-c467e06eebdc
+Accept: text/occi,text/plain,text/html
+Content-Type: text/occi
+Content-Length: 4
+
+OK
+end note
+
+
+s -> 8086: GET http://127.0.0.1:8086/publication/
+note right
+ GET /publication/ HTTP/1.1
+Host: 127.0.0.1
+User-Agent: CO-SWIFTPROCCI/1.0
+CATEGORY: publication; scheme="http://scheme.compatibleone.fr/scheme/compatible#"; class=kind; rel="http://scheme.ogf.org/occi/resource#";
+X-OCCI-ATTRIBUTE: occi.publication.where="marketplace"
+X-OCCI-ATTRIBUTE: occi.publication.what="agreement"
+Accept: text/occi
+Content-Type: text/occi
+end note
+
+
+s <-- 8086: HTTP/1.1 200 OK
+note right
+HTTP/1.1 200 OK
+Server: CO-PUB/1.0
+X-OCCI-Location: http://127.0.0.1:8086/publication/1dbd3501-9792-4a7d-94cd-abc59664d275
+Accept: text/occi,text/plain,text/html
+Content-Type: text/occi
+Content-Length: 4
+
+OK
+end note
+
+
+s -> 8086: GET http://127.0.0.1:8086/publication/1dbd3501-9792-4a7d-94cd-abc59664d275
+note right
+GET /publication/1dbd3501-9792-4a7d-94cd-abc59664d275 HTTP/1.1
+Host: 127.0.0.1
+User-Agent: CO-SWIFTPROCCI/1.0
+CATEGORY: publication; scheme="http://scheme.compatibleone.fr/scheme/compatible#"; class=kind; rel="http://scheme.ogf.org/occi/resource#";
+X-OCCI-ATTRIBUTE: occi.publication.where="marketplace"
+X-OCCI-ATTRIBUTE: occi.publication.what="agreement"
+Accept: text/occi
+Content-Type: text/occi
+end note
+
+
+s <-- 8086: HTTP/1.1 200 OK
+note right
+HTTP/1.1 200 OK
+Server: CO-PUB/1.0
+X-OCCI-Attribute: occi.core.id="1dbd3501-9792-4a7d-94cd-abc59664d275"
+X-OCCI-Attribute: occi.publication.rating="(null)"
+X-OCCI-Attribute: occi.publication.what="agreement"
+X-OCCI-Attribute: occi.publication.remote="(null)"
+X-OCCI-Attribute: occi.publication.zone="europe"
+X-OCCI-Attribute: occi.publication.pid="0"
+X-OCCI-Attribute: occi.publication.who="service-slam"
+X-OCCI-Attribute: occi.publication.when="1372232137"
+X-OCCI-Attribute: occi.publication.uptime="5063"
+X-OCCI-Attribute: occi.publication.state="1"
+X-OCCI-Attribute: occi.publication.pass="co-system"
+X-OCCI-Attribute: occi.publication.where="marketplace"
+X-OCCI-Attribute: occi.publication.why="http://127.0.0.1:8106"
+X-OCCI-Attribute: occi.publication.identity="(null)"
+X-OCCI-Attribute: occi.publication.operator="accords"
+X-OCCI-Attribute: occi.publication.price=""
+Accept: text/occi,text/plain,text/html
+Content-Type: text/occi
+Content-Length: 4
+
+OK
+end note
+
+
+s -> 8106: GET http://127.0.0.1:8106/-/
+note right
+GET /-/ HTTP/1.1
+Host: 127.0.0.1
+User-Agent: CO-SWIFTPROCCI/1.0
+Accept: text/occi
+Content-Type: text/occi
+end note
+
+s <-- 8106: HTTP/1.1 200 OK
+note right
+HTTP/1.1 200 OK
+Server: CO-SLAM/1.0
+Category: agreement; scheme="http://scheme.compatibleone.fr/scheme/compatible#"; class=kind; rel="http://scheme.ogf.org/occi/resource#"; attributes="occi.agreement.name occi.agreement.templatename occi.agreement.serviceprovider occi.agreement.state occi.agreement.initiation occi.agreement.expiration occi.agreement.templateid occi.agreement.description occi.agreement.initiator occi.agreement.responder occi.agreement.termss"; actions="http://scheme.compatibleone.fr/scheme/compatible/agreement/action#DELETE http://scheme.compatibleone.fr/scheme/compatible/agreement/action#instance"; location="/agreement/";
+Category: DELETE; scheme="http://scheme.compatibleone.fr/scheme/compatible/agreement/action#"; class=action; rel="http://scheme.ogf.org/occi/resource#"; location="/DELETE/";
+Category: instance; scheme="http://scheme.compatibleone.fr/scheme/compatible/agreement/action#"; class=action; rel="http://scheme.ogf.org/occi/resource#"; location="/instance/";
+Category: terms; scheme="http://scheme.compatibleone.fr/scheme/compatible#"; class=kind; rel="http://scheme.ogf.org/occi/resource#"; attributes="occi.terms.state occi.terms.type occi.terms.name occi.terms.description occi.terms.terms"; actions="http://scheme.compatibleone.fr/scheme/compatible/terms/action#DELETE"; location="/terms/";
+Category: DELETE; scheme="http://scheme.compatibleone.fr/scheme/compatible/terms/action#"; class=action; rel="http://scheme.ogf.org/occi/resource#"; location="/DELETE/";
+Category: term; scheme="http://scheme.compatibleone.fr/scheme/compatible#"; class=kind; rel="http://scheme.ogf.org/occi/resource#"; attributes="occi.term.state occi.term.type occi.term.name occi.term.description occi.term.guarantees occi.term.variables occi.term.provider occi.term.manifest"; actions="http://scheme.compatibleone.fr/scheme/compatible/term/action#DELETE"; location="/term/";
+Category: DELETE; scheme="http://scheme.compatibleone.fr/scheme/compatible/term/action#"; class=action; rel="http://scheme.ogf.org/occi/resource#"; location="/DELETE/";
+Category: variable; scheme="http://scheme.compatibleone.fr/scheme/compatible#"; class=kind; rel="http://scheme.ogf.org/occi/resource#"; attributes="occi.variable.name occi.variable.value occi.variable.state occi.variable.location occi.variable.property occi.variable.condition occi.variable.description occi.variable.metric"; actions="http://scheme.compatibleone.fr/scheme/compatible/variable/action#DELETE"; location="/variable/";
+Category: DELETE; scheme="http://scheme.compatibleone.fr/scheme/compatible/variable/action#"; class=action; rel="http://scheme.ogf.org/occi/resource#"; location="/DELETE/";
+Category: guarantee; scheme="http://scheme.compatibleone.fr/scheme/compatible#"; class=kind; rel="http://scheme.ogf.org/occi/resource#"; attributes="occi.guarantee.name occi.guarantee.importance occi.guarantee.state occi.guarantee.scope occi.guarantee.obligated occi.guarantee.description occi.guarantee.variable occi.guarantee.values"; actions="http://scheme.compatibleone.fr/scheme/compatible/guarantee/action#DELETE"; location="/guarantee/";
+Category: DELETE; scheme="http://scheme.compatibleone.fr/scheme/compatible/guarantee/action#"; class=action; rel="http://scheme.ogf.org/occi/resource#"; location="/DELETE/";
+Category: business; scheme="http://scheme.compatibleone.fr/scheme/compatible#"; class=kind; rel="http://scheme.ogf.org/occi/resource#"; attributes="occi.business.name occi.business.nature occi.business.type occi.business.state occi.business.expression occi.business.description"; actions="http://scheme.compatibleone.fr/scheme/compatible/business/action#DELETE"; location="/business/";
+Category: DELETE; scheme="http://scheme.compatibleone.fr/scheme/compatible/business/action#"; class=action; rel="http://scheme.ogf.org/occi/resource#"; location="/DELETE/";
+Category: control; scheme="http://scheme.compatibleone.fr/scheme/compatible#"; class=kind; rel="http://scheme.ogf.org/occi/resource#"; attributes="occi.control.name occi.control.importance occi.control.process occi.control.state occi.control.mode occi.control.objective occi.control.scope occi.control.property occi.control.obligated occi.control.condition occi.control.account occi.control.monitor occi.control.reference occi.control.metric occi.control.probe occi.control.agreement occi.control.contract occi.control.connection occi.control.session occi.control.timer"; actions="http://scheme.compatibleone.fr/scheme/compatible/control/action#DELETE http://scheme.compatibleone.fr/scheme/compatible/control/action#start http://scheme.compatibleone.fr/scheme/compatible/control/action#stop http://scheme.compatibleone.fr/scheme/compatible/control/action#verify"; location="/control/";
+Category: DELETE; scheme="http://scheme.compatibleone.fr/scheme/compatible/control/action#"; class=action; rel="http://scheme.ogf.org/occi/resource#"; location="/DELETE/";
+Category: start; scheme="http://scheme.compatibleone.fr/scheme/compatible/control/action#"; class=action; rel="http://scheme.ogf.org/occi/resource#"; location="/start/";
+Category: stop; scheme="http://scheme.compatibleone.fr/scheme/compatible/control/action#"; class=action; rel="http://scheme.ogf.org/occi/resource#"; location="/stop/";
+Category: verify; scheme="http://scheme.compatibleone.fr/scheme/compatible/control/action#"; class=action; rel="http://scheme.ogf.org/occi/resource#"; location="/verify/";
+Category: penalty; scheme="http://scheme.compatibleone.fr/scheme/compatible#"; class=kind; rel="http://scheme.ogf.org/occi/resource#"; attributes="occi.penalty.timestamp occi.penalty.state occi.penalty.data occi.penalty.name occi.penalty.sequence occi.penalty.control occi.penalty.account occi.penalty.agreement occi.penalty.contract"; actions="http://scheme.compatibleone.fr/scheme/compatible/penalty/action#DELETE"; location="/penalty/";
+Category: DELETE; scheme="http://scheme.compatibleone.fr/scheme/compatible/penalty/action#"; class=action; rel="http://scheme.ogf.org/occi/resource#"; location="/DELETE/";
+Category: connection; scheme="http://scheme.compatibleone.fr/scheme/compatible#"; class=kind; rel="http://scheme.ogf.org/occi/resource#"; attributes="occi.connection.start occi.connection.state occi.connection.finish occi.connection.pid occi.connection.name occi.connection.account occi.connection.session occi.connection.monitor occi.connection.probes"; actions="http://scheme.compatibleone.fr/scheme/compatible/connection/action#DELETE http://scheme.compatibleone.fr/scheme/compatible/connection/action#start http://scheme.compatibleone.fr/scheme/compatible/connection/action#stop http://scheme.compatibleone.fr/scheme/compatible/connection/action#capture http://scheme.compatibleone.fr/scheme/compatible/connection/action#consume"; location="/connection/";
+Category: DELETE; scheme="http://scheme.compatibleone.fr/scheme/compatible/connection/action#"; class=action; rel="http://scheme.ogf.org/occi/resource#"; location="/DELETE/";
+Category: start; scheme="http://scheme.compatibleone.fr/scheme/compatible/connection/action#"; class=action; rel="http://scheme.ogf.org/occi/resource#"; location="/start/";
+Category: stop; scheme="http://scheme.compatibleone.fr/scheme/compatible/connection/action#"; class=action; rel="http://scheme.ogf.org/occi/resource#"; location="/stop/";
+Category: capture; scheme="http://scheme.compatibleone.fr/scheme/compatible/connection/action#"; class=action; rel="http://scheme.ogf.org/occi/resource#"; location="/capture/";
+Category: consume; scheme="http://scheme.compatibleone.fr/scheme/compatible/connection/action#"; class=action; rel="http://scheme.ogf.org/occi/resource#"; location="/consume/";
+Category: packet; scheme="http://scheme.compatibleone.fr/scheme/compatible#"; class=kind; rel="http://scheme.ogf.org/occi/resource#"; attributes="occi.packet.finish occi.packet.name occi.packet.sequence occi.packet.start occi.packet.state occi.packet.samples occi.packet.data occi.packet.connection occi.packet.probe occi.packet.metric occi.packet.penalties"; actions="http://scheme.compatibleone.fr/scheme/compatible/packet/action#DELETE"; location="/packet/";
+Category: DELETE; scheme="http://scheme.compatibleone.fr/scheme/compatible/packet/action#"; class=action; rel="http://scheme.ogf.org/occi/resource#"; location="/DELETE/";
+Category: entity; scheme="http://schemas.ogf.org/core#"; class=kind; rel="http://scheme.ogf.org/occi/entity#"; attributes="occi.entity.id occi.entity.title"; location="/entity/";
+Category: resource; scheme="http://schemas.ogf.org/core#"; class=kind; rel="http://scheme.ogf.org/occi/resource#"; attributes="occi.resource.summary"; location="/resource/";
+Category: link; scheme="http://schemas.ogf.org/core#"; class=kind; rel="http://scheme.ogf.org/occi/link#"; attributes="occi.link.source occi.link.target"; location="/link/";
+Accept: text/occi,text/plain,text/html
+Content-Type: text/occi
+Content-Length: 4
+
+OK
+end note
+
+
+s -> 8106: GET http://127.0.0.1:8106/agreement/ 
+note right
+GET /agreement/ HTTP/1.1
+Host: 127.0.0.1
+User-Agent: CO-SWIFTPROCCI/1.0
+CATEGORY: agreement; scheme="http://scheme.compatibleone.fr/scheme/compatible#"; class=kind; rel="http://scheme.ogf.org/occi/resource#";
+X-OCCI-ATTRIBUTE: occi.agreement.initiator="http://127.0.0.1:8091/account/142d3c1b-c8f0-412d-925c-c467e06eebdc"
+Accept: text/occi
+Content-Type: text/occi
+end note
+
+
+s <-- 8106: HTTP/1.1 200 OK
+note right
+HTTP/1.1 200 OK
+Server: CO-SLAM/1.0
+Accept: text/occi,text/plain,text/html
+Content-Type: text/occi
+Content-Length: 4
+
+OK
+end note
+
+
+s -> 8093: GET http://127.0.0.1:8093/-/ 
+note right
+GET /-/ HTTP/1.1
+Host: 127.0.0.1
+User-Agent: CO-SWIFTPROCCI/1.0
+Accept: text/occi
+Content-Type: text/occi
+end note
+
+
+s <-- 8093: HTTP/1.1 200 OK
+note right
+HTTP/1.1 200 OK
+Server: CO-BROKER/1.0
+Category: action; scheme="http://scheme.compatibleone.fr/scheme/compatible#"; class=kind; rel="http://scheme.ogf.org/occi/resource#"; attributes="occi.action.expression occi.action.state occi.action.type occi.action.name"; actions="http://scheme.compatibleone.fr/scheme/compatible/action/action#DELETE"; location="/action/";
+Category: DELETE; scheme="http://scheme.compatibleone.fr/scheme/compatible/action/action#"; class=action; rel="http://scheme.ogf.org/occi/resource#"; location="/DELETE/";
+Category: plan; scheme="http://scheme.compatibleone.fr/scheme/compatible#"; class=kind; rel="http://scheme.ogf.org/occi/resource#"; attributes="occi.plan.access occi.plan.status occi.plan.name occi.plan.created occi.plan.services occi.plan.manifest"; actions="http://scheme.compatibleone.fr/scheme/compatible/plan/action#DELETE http://scheme.compatibleone.fr/scheme/compatible/plan/action#instance"; location="/plan/";
+Category: DELETE; scheme="http://scheme.compatibleone.fr/scheme/compatible/plan/action#"; class=action; rel="http://scheme.ogf.org/occi/resource#"; location="/DELETE/";
+Category: instance; scheme="http://scheme.compatibleone.fr/scheme/compatible/plan/action#"; class=action; rel="http://scheme.ogf.org/occi/resource#"; location="/instance/";
+Category: provider; scheme="http://scheme.compatibleone.fr/scheme/compatible#"; class=kind; rel="http://scheme.ogf.org/occi/resource#"; attributes="occi.provider.category occi.provider.profile occi.provider.name occi.provider.zone occi.provider.state occi.provider.opinion occi.provider.identity occi.provider.operator occi.provider.price occi.provider.security occi.provider.quotas"; actions="http://scheme.compatibleone.fr/scheme/compatible/provider/action#DELETE"; location="/provider/";
+Category: DELETE; scheme="http://scheme.compatibleone.fr/scheme/compatible/provider/action#"; class=action; rel="http://scheme.ogf.org/occi/resource#"; location="/DELETE/";
+Category: profile; scheme="http://scheme.compatibleone.fr/scheme/compatible#"; class=kind; rel="http://scheme.ogf.org/occi/resource#"; attributes="occi.profile.category occi.profile.name occi.profile.tarification occi.profile.provider"; actions="http://scheme.compatibleone.fr/scheme/compatible/profile/action#DELETE"; location="/profile/";
+Category: DELETE; scheme="http://scheme.compatibleone.fr/scheme/compatible/profile/action#"; class=action; rel="http://scheme.ogf.org/occi/resource#"; location="/DELETE/";
+Category: service; scheme="http://scheme.compatibleone.fr/scheme/compatible#"; class=kind; rel="http://scheme.ogf.org/occi/resource#"; attributes="occi.service.when occi.service.state occi.service.initiation occi.service.name occi.service.expiration occi.service.account occi.service.contracts occi.service.price occi.service.manifest occi.service.session occi.service.plan occi.service.sla occi.service.instructions"; actions="http://scheme.compatibleone.fr/scheme/compatible/service/action#DELETE http://scheme.compatibleone.fr/scheme/compatible/service/action#start http://scheme.compatibleone.fr/scheme/compatible/service/action#suspend http://scheme.compatibleone.fr/scheme/compatible/service/action#restart http://scheme.compatibleone.fr/scheme/compatible/service/action#save http://scheme.compatibleone.fr/scheme/compatible/service/action#snapshot http://scheme.compatibleone.fr/scheme/compatible/service/action#stop"; location="/service/";
+Category: DELETE; scheme="http://scheme.compatibleone.fr/scheme/compatible/service/action#"; class=action; rel="http://scheme.ogf.org/occi/resource#"; location="/DELETE/";
+Category: start; scheme="http://scheme.compatibleone.fr/scheme/compatible/service/action#"; class=action; rel="http://scheme.ogf.org/occi/resource#"; location="/start/";
+Category: suspend; scheme="http://scheme.compatibleone.fr/scheme/compatible/service/action#"; class=action; rel="http://scheme.ogf.org/occi/resource#"; location="/suspend/";
+Category: restart; scheme="http://scheme.compatibleone.fr/scheme/compatible/service/action#"; class=action; rel="http://scheme.ogf.org/occi/resource#"; location="/restart/";
+Category: save; scheme="http://scheme.compatibleone.fr/scheme/compatible/service/action#"; class=action; rel="http://scheme.ogf.org/occi/resource#"; location="/save/";
+Category: snapshot; scheme="http://scheme.compatibleone.fr/scheme/compatible/service/action#"; class=action; rel="http://scheme.ogf.org/occi/resource#"; location="/snapshot/";
+Category: stop; scheme="http://scheme.compatibleone.fr/scheme/compatible/service/action#"; class=action; rel="http://scheme.ogf.org/occi/resource#"; location="/stop/";
+Category: instance; scheme="http://scheme.compatibleone.fr/scheme/compatible#"; class=kind; rel="http://scheme.ogf.org/occi/resource#"; attributes="occi.instance.common occi.instance.state occi.instance.name occi.instance.description"; actions="http://scheme.compatibleone.fr/scheme/compatible/instance/action#DELETE"; location="/instance/";
+Category: DELETE; scheme="http://scheme.compatibleone.fr/scheme/compatible/instance/action#"; class=action; rel="http://scheme.ogf.org/occi/resource#"; location="/DELETE/";
+Category: entity; scheme="http://schemas.ogf.org/core#"; class=kind; rel="http://scheme.ogf.org/occi/entity#"; attributes="occi.entity.id occi.entity.title"; location="/entity/";
+Category: resource; scheme="http://schemas.ogf.org/core#"; class=kind; rel="http://scheme.ogf.org/occi/resource#"; attributes="occi.resource.summary"; location="/resource/";
+Category: link; scheme="http://schemas.ogf.org/core#"; class=kind; rel="http://scheme.ogf.org/occi/link#"; attributes="occi.link.source occi.link.target"; location="/link/";
+Accept: text/occi,text/plain,text/html
+Content-Type: text/occi
+Content-Length: 4
+
+OK
+end note
+
+
+s -> 8093: POST http://127.0.0.1:8093/provider/ 
+note right
+POST /provider/ HTTP/1.1
+Host: 127.0.0.1
+User-Agent: CO-SWIFTPROCCI/1.0
+CATEGORY: provider; scheme="http://scheme.compatibleone.fr/scheme/compatible#"; class=kind; rel="http://scheme.ogf.org/occi/resource#";
+X-OCCI-ATTRIBUTE: occi.provider.name="service-swiftprocci"
+X-OCCI-ATTRIBUTE: occi.provider.price=""
+X-OCCI-ATTRIBUTE: occi.provider.category="swift"
+X-OCCI-ATTRIBUTE: occi.provider.operator="accords"
+X-OCCI-ATTRIBUTE: occi.provider.identity="http://127.0.0.1:8108"
+Accept: text/occi
+Content-Type: text/occi
+end note
+
+s <-- 8093: HTTP/1.1 200 OK
+note right
+HTTP/1.1 200 OK
+Server: CO-BROKER/1.0
+X-OCCI-Location: http://127.0.0.1:8093/provider/761c6b92-270f-46fb-8282-39967fd2a730
+Accept: text/occi,text/plain,text/html
+Content-Type: text/occi
+Content-Length: 4
+
+OK
+end note
+
+
+s -> 8086: GET http://127.0.0.1:8086/publication/ 
+note right
+GET /publication/ HTTP/1.1
+Host: 127.0.0.1
+User-Agent: CO-SWIFTPROCCI/1.0
+CATEGORY: publication; scheme="http://scheme.compatibleone.fr/scheme/compatible#"; class=kind; rel="http://scheme.ogf.org/occi/resource#";
+X-OCCI-ATTRIBUTE: occi.publication.where="marketplace"
+X-OCCI-ATTRIBUTE: occi.publication.what="price"
+Accept: text/occi
+Content-Type: text/occi
+end note
+
+
+s <-- 8086: HTTP/1.1 200 OK
+note right
+HTTP/1.1 200 OK
+Server: CO-PUB/1.0
+X-OCCI-Location: http://127.0.0.1:8086/publication/b3168eb1-73b7-4d5d-bc85-2645828b14fa
+Accept: text/occi,text/plain,text/html
+Content-Type: text/occi
+Content-Length: 4
+
+OK
+end note
+
+s -> 8086: GET http://127.0.0.1:8086/publication/b3168eb1-73b7-4d5d-bc85-2645828b14fa 
+note right
+GET /publication/b3168eb1-73b7-4d5d-bc85-2645828b14fa HTTP/1.1
+Host: 127.0.0.1
+User-Agent: CO-SWIFTPROCCI/1.0
+CATEGORY: publication; scheme="http://scheme.compatibleone.fr/scheme/compatible#"; class=kind; rel="http://scheme.ogf.org/occi/resource#";
+X-OCCI-ATTRIBUTE: occi.publication.where="marketplace"
+X-OCCI-ATTRIBUTE: occi.publication.what="price"
+Accept: text/occi
+Content-Type: text/occi
+end note
+
+
+s <-- 8086: HTTP/1.1 200 OK
+note right
+HTTP/1.1 200 OK
+Server: CO-PUB/1.0
+X-OCCI-Attribute: occi.core.id="b3168eb1-73b7-4d5d-bc85-2645828b14fa"
+X-OCCI-Attribute: occi.publication.rating="(null)"
+X-OCCI-Attribute: occi.publication.what="price"
+X-OCCI-Attribute: occi.publication.remote="(null)"
+X-OCCI-Attribute: occi.publication.zone="europe"
+X-OCCI-Attribute: occi.publication.pid="0"
+X-OCCI-Attribute: occi.publication.who="service-coobas"
+X-OCCI-Attribute: occi.publication.when="1372232130"
+X-OCCI-Attribute: occi.publication.uptime="5070"
+X-OCCI-Attribute: occi.publication.state="1"
+X-OCCI-Attribute: occi.publication.pass="co-system"
+X-OCCI-Attribute: occi.publication.where="marketplace"
+X-OCCI-Attribute: occi.publication.why="http://127.0.0.1:8091"
+X-OCCI-Attribute: occi.publication.identity="(null)"
+X-OCCI-Attribute: occi.publication.operator="accords"
+X-OCCI-Attribute: occi.publication.price=""
+Accept: text/occi,text/plain,text/html
+Content-Type: text/occi
+Content-Length: 4
+
+OK
+end note
+
+
+s -> 8091: GET http://127.0.0.1:8091/price/ 
+note right
+GET /price/ HTTP/1.1
+Host: 127.0.0.1
+User-Agent: CO-SWIFTPROCCI/1.0
+CATEGORY: price; scheme="http://scheme.compatibleone.fr/scheme/compatible#"; class=kind; rel="http://scheme.ogf.org/occi/resource#";
+X-OCCI-ATTRIBUTE: occi.price.name="swift"
+Accept: text/occi
+Content-Type: text/occi
+end note
+
+
+s <-- 8091: HTTP/1.1 200 OK
+note right
+HTTP/1.1 200 OK
+Server: CO-BAS/1.0
+Accept: text/occi,text/plain,text/html
+Content-Type: text/occi
+Content-Length: 4
+
+OK
+end note
+
+
+s -> 8086: POST http://127.0.0.1:8086/publication/
+note right
+POST /publication/ HTTP/1.1
+Host: 127.0.0.1
+User-Agent: CO-SWIFTPROCCI/1.0
+CATEGORY: publication; scheme="http://scheme.compatibleone.fr/scheme/compatible#"; class=kind; rel="http://scheme.ogf.org/occi/resource#";
+X-OCCI-ATTRIBUTE: occi.publication.who="service-swiftprocci"
+X-OCCI-ATTRIBUTE: occi.publication.pass="co-system"
+X-OCCI-ATTRIBUTE: occi.publication.where="marketplace"
+X-OCCI-ATTRIBUTE: occi.publication.what="swift"
+X-OCCI-ATTRIBUTE: occi.publication.operator="accords"
+X-OCCI-ATTRIBUTE: occi.publication.zone="europe"
+X-OCCI-ATTRIBUTE: occi.publication.price=""
+X-OCCI-ATTRIBUTE: occi.publication.why="http://127.0.0.1:8108"
+Accept: text/occi
+Content-Type: text/occi
+end note
+
+
+s <-- 8086: HTTP/1.1 200 OK
+note right
+HTTP/1.1 200 OK
+Server: CO-PUB/1.0
+X-OCCI-Location: http://127.0.0.1:8086/publication/3315b6d9-da09-4101-8fce-72c363661121
+Accept: text/occi,text/plain,text/html
+Content-Type: text/occi
+Content-Length: 4
+
+OK
+end note
+
+
+s -> 8086: GET http://127.0.0.1:8086/publication/ 
+note right
+GET /publication/ HTTP/1.1
+Host: 127.0.0.1
+User-Agent: CO-SWIFTPROCCI/1.0
+CATEGORY: publication; scheme="http://scheme.compatibleone.fr/scheme/compatible#"; class=kind; rel="http://scheme.ogf.org/occi/resource#";
+X-OCCI-ATTRIBUTE: occi.publication.where="marketplace"
+X-OCCI-ATTRIBUTE: occi.publication.what="price"
+Accept: text/occi
+Content-Type: text/occi
+end note
+
+
+s <-- 8086: HTTP/1.1 200 OK
+note right
+HTTP/1.1 200 OK
+Server: CO-PUB/1.0
+X-OCCI-Location: http://127.0.0.1:8086/publication/b3168eb1-73b7-4d5d-bc85-2645828b14fa
+Accept: text/occi,text/plain,text/html
+Content-Type: text/occi
+Content-Length: 4
+
+OK
+end note
+
+
+s -> 8091: GET http://127.0.0.1:8091/price/ 
+note right
+GET /price/ HTTP/1.1
+Host: 127.0.0.1
+User-Agent: CO-SWIFTPROCCI/1.0
+CATEGORY: price; scheme="http://scheme.compatibleone.fr/scheme/compatible#"; class=kind; rel="http://scheme.ogf.org/occi/resource#";
+X-OCCI-ATTRIBUTE: occi.price.name="swift_configuration"
+Accept: text/occi
+Content-Type: text/occiright
+end note
+
+
+s <-- 8091: HTTP/1.1 200 OK
+note right
+HTTP/1.1 200 OK
+Server: CO-BAS/1.0
+Accept: text/occi,text/plain,text/html
+Content-Type: text/occi
+Content-Length: 4
+
+OK
+end note
+
+
+s -> 8086: POST http://127.0.0.1:8086/publication/ 
+note right
+POST /publication/ HTTP/1.1
+Host: 127.0.0.1
+User-Agent: CO-SWIFTPROCCI/1.0
+CATEGORY: publication; scheme="http://scheme.compatibleone.fr/scheme/compatible#"; class=kind; rel="http://scheme.ogf.org/occi/resource#";
+X-OCCI-ATTRIBUTE: occi.publication.who="service-swiftprocci"
+X-OCCI-ATTRIBUTE: occi.publication.pass="co-system"
+X-OCCI-ATTRIBUTE: occi.publication.where="marketplace"
+X-OCCI-ATTRIBUTE: occi.publication.what="swift_configuration"
+X-OCCI-ATTRIBUTE: occi.publication.operator="accords"
+X-OCCI-ATTRIBUTE: occi.publication.zone="europe"
+X-OCCI-ATTRIBUTE: occi.publication.price=""
+X-OCCI-ATTRIBUTE: occi.publication.why="http://127.0.0.1:8108"
+Accept: text/occi
+Content-Type: text/occi
+end note
+
+s <-- 8086: HTTP/1.1 200 OK
+note right
+HTTP/1.1 200 OK
+Server: CO-PUB/1.0
+X-OCCI-Location: http://127.0.0.1:8086/publication/f2d41f38-f535-4ce0-ab7e-9ea8dccb54b3
+Accept: text/occi,text/plain,text/html
+Content-Type: text/occi
+Content-Length: 4
+
+OK
+end note
+
+
+s -> s: REST Server CO-SWIFTPROCCI/1.0 : listening on port : 8108
+
+
+@enduml
