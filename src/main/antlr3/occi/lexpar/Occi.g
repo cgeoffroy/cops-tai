@@ -41,6 +41,8 @@ options {
     import java.math.BigInteger;
     import java.net.URI;
     import java.net.URISyntaxException;
+    import java.net.URL;
+    import java.net.MalformedURLException;
     import antlr.SemanticException;
     
     import org.tai.cops.occi.client.TypeIdentifier;
@@ -144,13 +146,13 @@ headers                returns [HashMap value] :
                            List<Category> catList = new ArrayList();
                            ArrayList linkList = new ArrayList();
                            ArrayList attrList = new ArrayList();
-                           ArrayList locList = new ArrayList();
+                           List<URL> locList = new ArrayList<URL>();
                          }
                          ((
                            category  { if($category.cats != null) catList.addAll($category.cats); } |
                            link      { if($link.link != null) linkList.add($link.link); } |
                            attribute { if($attribute.attrs != null) attrList.add($attribute.attrs); } |
-                           location  { if($location.urls != null) locList.add($location.urls); }
+                           location  { if($location.urls != null) locList.addAll($location.urls); }
                          ) (EOF | '\n') )*
                          {
                            $value.put(occi_categories, catList);
@@ -420,24 +422,34 @@ e.g.
     http://example.com/compute/123, \
     http://example.com/compute/456
 */
-location               returns [ArrayList urls] :
+location               returns [List<URL> urls] :
                          'X-OCCI-Location' ':'
                          location_values{
                            $urls = $location_values.urls;
                          }
                          ;
 
-location_values        returns [ArrayList urls]:
-	                       u1=URL {
-	                         $urls = new ArrayList();
-	                         $urls.add($u1.text);
-	                       }
-	                       (
+location_values        returns [List<URL> urls]
+						@init{ List<String> _tmp = new ArrayList<String>(); }:
+	                    	(u1=( options {greedy=false;} : . )+ {
+	                         	$urls = new ArrayList<URL>();
+	                         	_tmp.add($u1.text);
+	                       	}
+	                       	(
 	                         ','
-	                         u2=URL{
-	                           $urls.add($u2.text);
+	                         u2=( options {greedy=false;} : . )+ {
+	                           	_tmp.add($u2.text);
 	                         }
-	                       )*
+	                       	)*) {
+	                       		for(String elt : _tmp) {
+	                       			try {
+	                       				$urls.add(new URL(removeQuotes(elt)));
+	                       			} catch (MalformedURLException z) {
+	    								throw (new RuntimeException(new SemanticException("Detected an invalid URL: " + z.toString())));
+	    							}
+	                       		}
+	                       	
+	                       	}
 	                       ;
 
 quoted_uri    returns [URI uri]:

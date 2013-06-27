@@ -3,6 +3,7 @@ package org.tai.cops;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URI;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -56,6 +57,19 @@ public class TestsParsing {
 		Map<String, ArrayList<String>> hds = op.headers();
 		
 		assertEquals(hds.get(OcciParser.occi_categories).size(), 15);
+	}
+	
+	@Test
+	public void h() throws Exception {
+		String input = "X-OCCI-Location: http://127.0.0.1:8086/publication/93676c24-de2f-4731-83bd-24bc8daaf448,"
+				+ "http://127.0.0.1:8086/publication/93676c24-de2f-4731-83bd-24bc8daaf448";
+		
+		OcciParser op = OcciParser.getParser(input);
+		
+		List<URL> cats = op.location();
+		assertEquals(cats.size(), 2);
+		assertEquals(cats.get(0).toString(), "http://127.0.0.1:8086/publication/93676c24-de2f-4731-83bd-24bc8daaf448");
+		assertEquals(cats.get(1).toString(), "http://127.0.0.1:8086/publication/93676c24-de2f-4731-83bd-24bc8daaf448");
 	}
 	
 }
