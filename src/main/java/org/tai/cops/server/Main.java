@@ -24,6 +24,7 @@ import com.google.inject.servlet.GuiceFilter;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
+import com.sun.jersey.api.client.filter.LoggingFilter;
 
 import fj.F;
 import fj.data.Option;
@@ -98,6 +99,7 @@ public class Main {
 		logger.debug("next location = {}", ptionUri);
 		
 		logger.debug("connecting to the publication category");
+		client.addFilter(new LoggingFilter(System.out));
 		webResource = client.resource(ptionUri);
 		response = webResource.accept("text/occi").type("text/occi")
 				.header("Category", o.some().getRequestFilter())
