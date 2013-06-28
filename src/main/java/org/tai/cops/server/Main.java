@@ -93,6 +93,10 @@ public class Main {
         ClientResponse response;
         
         List<Category> tmp = loadRoot(PUBLISHER_URL);
+        if (null == tmp || tmp.size() <= 0) {
+        	logger.error("Unable to load categories from the publisher");
+        }
+        
 		fj.data.List<Category> u = fj.data.List.iterableList(tmp);
 		Option<Category> o = u.find(new F<Category, Boolean>() {		
 			@Override
