@@ -65,7 +65,8 @@ public class Main {
         root.addServlet(EmptyServlet.class, "/*");
 
         Client client = Client.create();
-        
+		client.addFilter(new LoggingFilter(System.out));
+		
 		WebResource webResource = client.resource(PUBLISHER_URL + "/-/");
 		
 		logger.debug("connecting to publisher");
@@ -99,13 +100,39 @@ public class Main {
 		logger.debug("next location = {}", ptionUri);
 		
 		logger.debug("connecting to the publication category");
-		client.addFilter(new LoggingFilter(System.out));
 		webResource = client.resource(ptionUri);
 		response = webResource.accept("text/occi").type("text/occi")
 				.header("Category", o.some().getRequestFilter())
 				.header("X-OCCI-Attribute", "occi.publication.where=\"marketplace\"")
 				.header("X-OCCI-Attribute", "occi.publication.what=\"provider\"")
 				.get(ClientResponse.class);
+		if (response.getStatus() != 200 && !response.getHeaders().containsKey("X-OCCI-Location")) {
+			logger.error("the provider location was not found");
+			System.exit(1);
+		}
+		List<String> possibleLoc = response.getHeaders().get("X-OCCI-Location");
+		List<URL> possibleLocUrl = new ArrayList<>();
+		for (String s : possibleLoc) {
+			possibleLocUrl.addAll(OcciParser.getParser(s).location_values());
+		}
+		response = null;
+		for (URL u1 : possibleLocUrl) {
+			logger.debug("trying to reach provider '{}'", u1);
+			webResource = client.resource(u1.toString());
+			response = webResource.accept("text/occi").type("text/occi")
+					.header("Category", o.some().getRequestFilter())
+					.header("X-OCCI-Attribute", "occi.publication.where=\"marketplace\"")
+					.header("X-OCCI-Attribute", "occi.publication.what=\"provider\"")
+					.get(ClientResponse.class);
+			if (response.getStatus() == 200) {
+				break;
+			}
+			response = null;
+		}
+		if (null == response) {
+			logger.error("no provider servers were reachable");
+			System.exit(1);
+		}
 		
 		
         server.start();
