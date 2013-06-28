@@ -18,6 +18,7 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.tai.cops.occi.ERenderingStructures;
 import org.tai.cops.occi.client.Category;
+import org.tai.cops.occi.client.Publication;
 
 import com.google.inject.servlet.GuiceFilter;
 
@@ -134,6 +135,16 @@ public class Main {
 			System.exit(1);
 		}
 		
+		Map<String, String> possibleAttributes = new HashMap<>();
+		for (String s : response.getHeaders().get("X-OCCI-Attribute")) {
+			for (Entry<String, Object> z : OcciParser.getParser(s).attributes_attr().entrySet()) {
+				possibleAttributes.put(z.getKey(), (String) z.getValue());
+			}
+		}
+		
+		Publication p = new Publication(possibleAttributes);
+		logger.debug("parsed the publication: {}", 
+				mapper.writeValueAsString(p));
 		
         server.start();
     }

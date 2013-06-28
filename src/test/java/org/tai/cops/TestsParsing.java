@@ -3,6 +3,7 @@ package org.tai.cops;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -12,6 +13,8 @@ import java.util.Map;
 import occi.lexpar.OcciParser;
 
 import org.tai.cops.occi.client.Category;
+import org.tai.cops.occi.client.Publication;
+import org.tai.cops.occi.client.Resource;
 import org.tai.cops.occi.client.TypeIdentifier;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -21,7 +24,22 @@ import com.google.common.io.CharStreams;
 import static org.testng.Assert.assertEquals;
 
 public class TestsParsing {
-
+	
+	@Test void a() throws URISyntaxException {
+		HashMap<String, String> m = new HashMap<>();
+		m.put("occi.core.id", "http://www.truc.machin:465");
+		m.put("occi.core.summary", "un petit résumé");
+		Resource r = new Resource(m);
+		
+		assertEquals(r.getId(), new URI("http://www.truc.machin:465"));
+		assertEquals(r.getSummary(), "un petit résumé");
+	}
+	
+	@Test(expectedExceptions=RuntimeException.class, expectedExceptionsMessageRegExp="the '.*' field is mandatory")
+	public void b() throws URISyntaxException {
+		new Publication(new HashMap<String, String>());
+	}
+	
 	@Test
 	public void f() throws Exception {
 		String input = "Category: publication; "

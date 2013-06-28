@@ -145,13 +145,13 @@ headers                returns [HashMap value] :
                            $value = new HashMap();
                            List<Category> catList = new ArrayList();
                            ArrayList linkList = new ArrayList();
-                           ArrayList attrList = new ArrayList();
+                           Map<String, Object> attrList = new HashMap<>();
                            List<URL> locList = new ArrayList<URL>();
                          }
                          ((
                            category  { if($category.cats != null) catList.addAll($category.cats); } |
                            link      { if($link.link != null) linkList.add($link.link); } |
-                           attribute { if($attribute.attrs != null) attrList.add($attribute.attrs); } |
+                           attribute { if($attribute.attrs != null) attrList.putAll($attribute.attrs); } |
                            location  { if($location.urls != null) locList.addAll($location.urls); }
                          ) (EOF | '\n') )*
                          {
@@ -361,18 +361,18 @@ category_attr          returns [String value] :
 
 attribute_attr         returns [HashMap attr] :
                         ';' attributes_attr {
-                            $attr = $attributes_attr.attrs;
+                            $attr = (HashMap) $attributes_attr.attrs;
                         }
                         ;
 
-attributes_attr        returns [HashMap attrs] :
+attributes_attr        returns [Map<String, Object> attrs] :
                          kv1=attribute_kv_attr {
-                               $attrs = new HashMap();
-                               $attrs.put($kv1.keyval.get(0), $kv1.keyval.get(1));
+                               $attrs = new HashMap<String, Object>();
+                               $attrs.put((String) $kv1.keyval.get(0), $kv1.keyval.get(1));
                              }
                          (
                            ',' kv2=attribute_kv_attr {
-                                     $attrs.put($kv2.keyval.get(0), $kv2.keyval.get(1));
+                                     $attrs.put((String) $kv2.keyval.get(0), $kv2.keyval.get(1));
                                    }
                          )*
                          ;
@@ -410,7 +410,7 @@ e.g.
     occi.compute.memory=3.0, \
     occi.compute.state="active"
 */
-attribute              returns [HashMap attrs] :
+attribute              returns [Map<String, Object> attrs] :
                          'X-OCCI-Attribute' ':'
                          attributes_attr{
                            $attrs = $attributes_attr.attrs;
