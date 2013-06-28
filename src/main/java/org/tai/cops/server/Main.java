@@ -41,6 +41,8 @@ import occi.lexpar.OcciParser;
 public class Main {
 	public static URI PUBLISHER_URL;
 	
+	private static ObjectMapper mapper = new ObjectMapper();
+	
 	private static String rebuildOcciHeaders(Map<String, List<String>> headers) {
 		StringBuilder buffer = new StringBuilder();
 		for (Entry<String, List<String>> i_elt : headers.entrySet()) {
@@ -55,6 +57,27 @@ public class Main {
 	
 	final static Logger logger = LoggerFactory.getLogger(Main.class);
 	
+	private static List<Category> loadRoot(URI location) throws Exception {
+		Client client = Client.create();
+		client.addFilter(new LoggingFilter(System.out));
+		WebResource webResource = client.resource(PUBLISHER_URL + "/-/");
+		
+		logger.debug("connecting to location: {}", location);
+		ClientResponse response = webResource.accept("text/occi").type("text/occi")
+                   .get(ClientResponse.class);		
+        
+		logger.debug("rebuilding occi headers with the response");		
+        String occiHeaders = rebuildOcciHeaders(response.getHeaders());
+        logger.debug("rebuild result:\n" + occiHeaders);
+        
+        OcciParser op = OcciParser.getParser(occiHeaders);
+        Map<String, ArrayList> hs = op.headers();
+		logger.debug("parsed {} catogories: {}", hs.get(OcciParser.occi_categories).size(),
+				mapper.writeValueAsString(hs.get(OcciParser.occi_categories)));
+		
+		return hs.get(OcciParser.occi_categories);
+	}
+	
     public static void main(String[] args) throws Exception {
     	PUBLISHER_URL = new URI("http://127.0.0.1:8086");
     	
@@ -64,27 +87,12 @@ public class Main {
         root.addEventListener(new SampleConfig());
         root.addFilter(GuiceFilter.class, "/*", EnumSet.of(DispatcherType.REQUEST));
         root.addServlet(EmptyServlet.class, "/*");
-
-        Client client = Client.create();
-		client.addFilter(new LoggingFilter(System.out));
-		
-		WebResource webResource = client.resource(PUBLISHER_URL + "/-/");
-		
-		logger.debug("connecting to publisher");
-		ClientResponse response = webResource.accept("text/occi").type("text/occi")
-                   .get(ClientResponse.class);
-		
-		logger.debug("rebuilding occi headers with the response");		
-        String occiHeaders = rebuildOcciHeaders(response.getHeaders());
-        logger.debug("rebuild result:\n" + occiHeaders);
         
-        OcciParser op = OcciParser.getParser(occiHeaders);
-        Map<String, ArrayList> hs = op.headers();
-        ObjectMapper mapper = new ObjectMapper();
-		logger.debug("parsed {} catogories: {}", hs.get(OcciParser.occi_categories).size(),
-				mapper.writeValueAsString(hs.get(OcciParser.occi_categories)));
-		
-		List<Category> tmp = hs.get(OcciParser.occi_categories);
+        Client client = Client.create();
+        WebResource webResource;
+        ClientResponse response;
+        
+        List<Category> tmp = loadRoot(PUBLISHER_URL);
 		fj.data.List<Category> u = fj.data.List.iterableList(tmp);
 		Option<Category> o = u.find(new F<Category, Boolean>() {		
 			@Override
