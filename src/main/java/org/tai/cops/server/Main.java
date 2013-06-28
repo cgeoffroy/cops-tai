@@ -17,6 +17,7 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.tai.cops.occi.ERenderingStructures;
+import org.tai.cops.occi.client.Categories;
 import org.tai.cops.occi.client.Category;
 import org.tai.cops.occi.client.Publication;
 
@@ -97,25 +98,22 @@ public class Main {
         	logger.error("Unable to load categories from the publisher");
         }
         
-		fj.data.List<Category> u = fj.data.List.iterableList(tmp);
-		Option<Category> o = u.find(new F<Category, Boolean>() {		
-			@Override
-			public Boolean f(Category a) {
-				return "publication".equals(a.getTerm());
-			}
-		});
-		if (o.isNone()) {
-			logger.error("Cannot find the publication category");
-			System.exit(1);
-		}
+        Category pubCat;
+        {	Option<Category> oc = Categories.findCategory(tmp, "publication");
+        	if (oc.isNone()) {
+        		logger.error("Cannot find the publication category in the listing");
+    			System.exit(1);
+        	}
+        	pubCat = oc.some();
+        }
 
-		URI ptionUri = PUBLISHER_URL.resolve(o.some().getLocation());
+		URI ptionUri = PUBLISHER_URL.resolve(pubCat.getLocation());
 		logger.debug("next location = {}", ptionUri);
 		
 		logger.debug("connecting to the publication category");
 		webResource = client.resource(ptionUri);
 		response = webResource.accept("text/occi").type("text/occi")
-				.header("Category", o.some().getRequestFilter())
+				.header("Category", pubCat.getRequestFilter())
 				.header("X-OCCI-Attribute", "occi.publication.where=\"marketplace\"")
 				.header("X-OCCI-Attribute", "occi.publication.what=\"provider\"")
 				.get(ClientResponse.class);
@@ -133,7 +131,7 @@ public class Main {
 			logger.debug("trying to reach provider '{}'", u1);
 			webResource = client.resource(u1.toString());
 			response = webResource.accept("text/occi").type("text/occi")
-					.header("Category", o.some().getRequestFilter())
+					.header("Category", pubCat.getRequestFilter())
 					.header("X-OCCI-Attribute", "occi.publication.where=\"marketplace\"")
 					.header("X-OCCI-Attribute", "occi.publication.what=\"provider\"")
 					.get(ClientResponse.class);
