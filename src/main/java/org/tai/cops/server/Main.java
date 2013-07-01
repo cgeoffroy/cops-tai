@@ -155,12 +155,14 @@ public class Main {
         root.addFilter(GuiceFilter.class, "/*", EnumSet.of(DispatcherType.REQUEST));
         root.addServlet(EmptyServlet.class, "/*");
         
-        
+        /* we discover '/-/' on the publisher and get the categories he manage */
         List<Category> publisherCategories = loadRoot(PUBLISHER_URL);
         if (null == publisherCategories || publisherCategories.size() <= 0) {
         	logger.error("Unable to load categories from the publisher");
         }
         logger.debug("got some categories: {}", mapper.writeValueAsString(publisherCategories));
+        
+        /* we look for the 'publication' category */
         Category publicationCat;
         {	Option<Category> oc = Categories.findCategory(publisherCategories, "publication");
         	if (oc.isNone()) {
@@ -170,25 +172,29 @@ public class Main {
         	publicationCat = oc.some();
         }
         
-        List<String>filters = Arrays.asList("occi.publication.where=\"marketplace\"",
-        		"occi.publication.what=\"provider\""); 
+        List<String> filters = Arrays.asList("occi.publication.where=\"marketplace\"",
+        		"occi.publication.what=\"provider\"");
+        
+        /* we ask the publisher to filter his publication instances and get some candidates */
         List<URL> possibleLocUrl = makeRequestesToLocation(PUBLISHER_URL, publicationCat, filters);
         
         Map<String, String> possibleAttributes = new HashMap<>();
+        /* we fetch the first publication resource, and retrieve his 'Attribute' headers */
         for (String s : fetchFirstResource(possibleLocUrl, publicationCat, filters).get("X-OCCI-Attribute")) {
         	for (Entry<String, Object> z : OcciParser.getParser(s).attributes_attr().entrySet()) {
         		possibleAttributes.put(z.getKey(), (String) z.getValue());
         	}
         }
 		
-		Publication p = null;
+		Publication mgrResourcesProvider = null;
 		try {
-			p = new Publication(possibleAttributes);
+			/* from the parsed headers, we build a 'Publication' instance */
+			mgrResourcesProvider = new Publication(possibleAttributes);
 		} catch (RuntimeException z) {
 			logger.error("error while building the publication resource", z);
 			System.exit(1);
 		}
-		logger.debug("parsed the publication: {}", mapper.writeValueAsString(p));
+		logger.debug("parsed the publication: {}", mapper.writeValueAsString(mgrResourcesProvider));
 		
         server.start();
     }
