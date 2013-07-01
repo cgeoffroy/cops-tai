@@ -1,7 +1,6 @@
 package org.tai.cops.server;
 
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -24,7 +23,6 @@ import org.tai.cops.occi.client.Categories;
 import org.tai.cops.occi.client.Category;
 import org.tai.cops.occi.client.Publication;
 
-import com.beust.jcommander.internal.Lists;
 import com.google.inject.servlet.GuiceFilter;
 
 import com.sun.jersey.api.client.Client;
@@ -49,6 +47,12 @@ public class Main {
 	
 	private static ObjectMapper mapper = new ObjectMapper();
 	
+	private static Client buildClient() {
+		Client client = Client.create();
+		client.addFilter(new LoggingFilter(System.out));
+		return client;
+	}
+	
 	private static String rebuildOcciHeaders(Map<String, List<String>> headers) {
 		StringBuilder buffer = new StringBuilder();
 		for (Entry<String, List<String>> i_elt : headers.entrySet()) {
@@ -64,8 +68,7 @@ public class Main {
 	final static Logger logger = LoggerFactory.getLogger(Main.class);
 	
 	private static List<Category> loadRoot(URI location) throws Exception {
-		Client client = Client.create();
-		client.addFilter(new LoggingFilter(System.out));
+		Client client = buildClient();
 		WebResource webResource = client.resource(PUBLISHER_URL + "/-/");
 		
 		logger.debug("connecting to location: {}", location);
@@ -89,8 +92,7 @@ public class Main {
 		URI ptionUri = root.resolve(cat.getLocation());
 		logger.debug("next location = {}", ptionUri);
 		
-		Client client = Client.create();
-		client.addFilter(new LoggingFilter(System.out));
+		Client client = buildClient();
 		
 		logger.debug("connecting to the publication category");
 		Builder b = client.resource(ptionUri).accept("text/occi").type("text/occi")
@@ -121,8 +123,7 @@ public class Main {
 	
 	private static @Nonnull MultivaluedMap<String, String> fetchFirstResource(@Nonnull List<URL> locations,
 			@Nonnull Category cat, @Nonnull List<String> filters) {
-		Client client = Client.create();
-		client.addFilter(new LoggingFilter(System.out));
+		Client client = buildClient();
 		ClientResponse response = null;
 		for (URL u1 : locations) {
 			logger.debug("trying to reach provider '{}'", u1);
