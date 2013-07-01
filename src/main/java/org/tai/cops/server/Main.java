@@ -155,26 +155,26 @@ public class Main {
         root.addServlet(EmptyServlet.class, "/*");
         
         
-        List<Category> tmp = loadRoot(PUBLISHER_URL);
-        if (null == tmp || tmp.size() <= 0) {
+        List<Category> publisherCategories = loadRoot(PUBLISHER_URL);
+        if (null == publisherCategories || publisherCategories.size() <= 0) {
         	logger.error("Unable to load categories from the publisher");
         }
-        logger.debug("got some categories: {}", mapper.writeValueAsString(tmp));
-        Category pubCat;
-        {	Option<Category> oc = Categories.findCategory(tmp, "publication");
+        logger.debug("got some categories: {}", mapper.writeValueAsString(publisherCategories));
+        Category publicationCat;
+        {	Option<Category> oc = Categories.findCategory(publisherCategories, "publication");
         	if (oc.isNone()) {
         		logger.error("Cannot find the publication category in the listing");
     			System.exit(1);
         	}
-        	pubCat = oc.some();
+        	publicationCat = oc.some();
         }
         
         List<String>filters = Arrays.asList("occi.publication.where=\"marketplace\"",
         		"occi.publication.what=\"provider\""); 
-        List<URL> possibleLocUrl = makeRequestesToLocation(PUBLISHER_URL, pubCat, filters);
+        List<URL> possibleLocUrl = makeRequestesToLocation(PUBLISHER_URL, publicationCat, filters);
         
         Map<String, String> possibleAttributes = new HashMap<>();
-        for (String s : fetchFirstResource(possibleLocUrl, pubCat, filters).get("X-OCCI-Attribute")) {
+        for (String s : fetchFirstResource(possibleLocUrl, publicationCat, filters).get("X-OCCI-Attribute")) {
         	for (Entry<String, Object> z : OcciParser.getParser(s).attributes_attr().entrySet()) {
         		possibleAttributes.put(z.getKey(), (String) z.getValue());
         	}
