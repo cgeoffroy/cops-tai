@@ -1,5 +1,7 @@
 package org.tai.cops.server;
 
+import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
 import java.net.URL;
 import java.util.ArrayList;
@@ -15,6 +17,8 @@ import javax.servlet.DispatcherType;
 import javax.ws.rs.core.MultivaluedMap;
 
 import org.antlr.runtime.RecognitionException;
+import org.codehaus.jackson.JsonGenerationException;
+import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
@@ -22,6 +26,7 @@ import org.tai.cops.occi.ERenderingStructures;
 import org.tai.cops.occi.client.Categories;
 import org.tai.cops.occi.client.Category;
 import org.tai.cops.occi.client.Publication;
+import org.tai.cops.occi.client.Resource;
 
 import com.google.inject.servlet.GuiceFilter;
 
@@ -197,6 +202,67 @@ public class Main {
 		}
 		logger.debug("parsed the publication: {}", mapper.writeValueAsString(mgrResourcesProvider));
 		
+		Resource mgrResourcesAccount = null;
+		try {
+			mgrResourcesAccount = fetch(PUBLISHER_URL, Resource.class);
+		} catch (Exception e) {
+			logger.error("error while looking the the Account manager", e);
+		}
+		
         server.start();
     }
+    
+    private static <T extends Resource> T fetch(URI root, Class<T> t) throws Exception {
+        /* we discover '/-/' on the publisher and get the categories he manage */
+        List<Category> publisherCategories = loadRoot(root);
+        if (null == publisherCategories || publisherCategories.size() <= 0) {
+        	logger.error("Unable to load categories from the publisher");
+        }
+        logger.debug("got some categories: {}", mapper.writeValueAsString(publisherCategories));
+        
+        /* we look for the 'publication' category */
+        Category publicationCat;
+        {	Option<Category> oc = Categories.findCategory(publisherCategories, "publication");
+        	if (oc.isNone()) {
+        		logger.error("Cannot find the publication category in the listing");
+    			System.exit(1);
+        	}
+        	publicationCat = oc.some();
+        }
+        
+        List<String> filters = Arrays.asList("occi.publication.where=\"marketplace\"",
+        		"occi.publication.what=\"provider\"");
+        
+        /* we ask the publisher to filter his publication instances and get some candidates */
+        List<URL> possibleLocUrl = makeRequestesToLocation(root, publicationCat, filters);
+        
+        Map<String, String> possibleAttributes = new HashMap<>();
+        /* we fetch the first publication resource, and retrieve his 'Attribute' headers */
+        for (String s : fetchFirstResource(possibleLocUrl, publicationCat, filters).get("X-OCCI-Attribute")) {
+        	for (Entry<String, Object> z : OcciParser.getParser(s).attributes_attr().entrySet()) {
+        		possibleAttributes.put(z.getKey(), (String) z.getValue());
+        	}
+        }
+		
+		T mgrResourcesProvider = null;
+		try {
+			/* from the parsed headers, we build a 'Publication' instance */
+			mgrResourcesProvider = t.getConstructor(Map.class).newInstance(possibleAttributes);
+			logger.debug("parsed the resource: {}", mapper.writeValueAsString(mgrResourcesProvider));
+		} catch (InstantiationException | IllegalAccessException | InvocationTargetException 
+    			| NoSuchMethodException z) {
+			logger.error("fatal error, all Resource sub-class must have this constructor", z);
+			System.exit(2);
+		} catch (RuntimeException z) {
+			logger.error("error while building the publication resource", z);
+			System.exit(1);
+		} catch (JsonGenerationException | JsonMappingException e) {
+			logger.debug("json output error A: ", e);
+		} catch (IOException e) {
+			logger.debug("json output error B:", e);
+		}	
+		
+		return mgrResourcesProvider;
+    }
+    
 }
