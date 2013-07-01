@@ -1,6 +1,7 @@
 package org.tai.cops.server;
 
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -180,9 +181,14 @@ public class Main {
         	}
         }
 		
-		Publication p = new Publication(possibleAttributes);
-		logger.debug("parsed the publication: {}", 
-				mapper.writeValueAsString(p));
+		Publication p = null;
+		try {
+			p = new Publication(possibleAttributes);
+		} catch (RuntimeException z) {
+			logger.error("error while building the publication resource", z);
+			System.exit(1);
+		}
+		logger.debug("parsed the publication: {}", mapper.writeValueAsString(p));
 		
         server.start();
     }
