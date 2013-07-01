@@ -12,6 +12,7 @@ import java.util.Map.Entry;
 
 import javax.annotation.Nonnull;
 import javax.servlet.DispatcherType;
+import javax.ws.rs.core.MultivaluedMap;
 
 import org.antlr.runtime.RecognitionException;
 import org.codehaus.jackson.map.ObjectMapper;
@@ -30,6 +31,7 @@ import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.WebResource.Builder;
 import com.sun.jersey.api.client.filter.LoggingFilter;
+import com.sun.jersey.core.util.MultivaluedMapImpl;
 
 import fj.data.Option;
 
@@ -116,6 +118,32 @@ public class Main {
 		return possibleLocUrl;
 	}
 	
+	private static @Nonnull MultivaluedMap<String, String> fetchFirstResource(@Nonnull List<URL> locations,
+			@Nonnull Category cat, @Nonnull List<String> filters) {
+		Client client = Client.create();
+		client.addFilter(new LoggingFilter(System.out));
+		ClientResponse response = null;
+		for (URL u1 : locations) {
+			logger.debug("trying to reach provider '{}'", u1);
+			Builder b = client.resource(u1.toString()).accept("text/occi").type("text/occi")
+					.header("Category", cat.getRequestFilter());
+			for (String s : filters) {
+				b.header("X-OCCI-Attribute", s);
+			}
+			response = b.get(ClientResponse.class);
+			if (response.getStatus() == 200) {
+				break;
+			}
+			response = null;
+		}
+		if (null == response) {
+			logger.error("no provider servers were reachable");
+			return new MultivaluedMapImpl();
+		} else {
+			return response.getHeaders();
+		}
+	}
+	
     public static void main(String[] args) throws Exception {
     	PUBLISHER_URL = new URI("http://127.0.0.1:8086");
     	
@@ -126,9 +154,6 @@ public class Main {
         root.addFilter(GuiceFilter.class, "/*", EnumSet.of(DispatcherType.REQUEST));
         root.addServlet(EmptyServlet.class, "/*");
         
-        Client client = Client.create();
-        WebResource webResource;
-        ClientResponse response;
         
         List<Category> tmp = loadRoot(PUBLISHER_URL);
         if (null == tmp || tmp.size() <= 0) {
@@ -144,34 +169,16 @@ public class Main {
         	pubCat = oc.some();
         }
         
-        List<URL> possibleLocUrl = makeRequestesToLocation(PUBLISHER_URL, pubCat,
-        		Arrays.asList("occi.publication.where=\"marketplace\"", "occi.publication.what=\"provider\""));
-		
-		response = null;
-		for (URL u1 : possibleLocUrl) {
-			logger.debug("trying to reach provider '{}'", u1);
-			webResource = client.resource(u1.toString());
-			response = webResource.accept("text/occi").type("text/occi")
-					.header("Category", pubCat.getRequestFilter())
-					.header("X-OCCI-Attribute", "occi.publication.where=\"marketplace\"")
-					.header("X-OCCI-Attribute", "occi.publication.what=\"provider\"")
-					.get(ClientResponse.class);
-			if (response.getStatus() == 200) {
-				break;
-			}
-			response = null;
-		}
-		if (null == response) {
-			logger.error("no provider servers were reachable");
-			System.exit(1);
-		}
-		
-		Map<String, String> possibleAttributes = new HashMap<>();
-		for (String s : response.getHeaders().get("X-OCCI-Attribute")) {
-			for (Entry<String, Object> z : OcciParser.getParser(s).attributes_attr().entrySet()) {
-				possibleAttributes.put(z.getKey(), (String) z.getValue());
-			}
-		}
+        List<String>filters = Arrays.asList("occi.publication.where=\"marketplace\"",
+        		"occi.publication.what=\"provider\""); 
+        List<URL> possibleLocUrl = makeRequestesToLocation(PUBLISHER_URL, pubCat, filters);
+        
+        Map<String, String> possibleAttributes = new HashMap<>();
+        for (String s : fetchFirstResource(possibleLocUrl, pubCat, filters).get("X-OCCI-Attribute")) {
+        	for (Entry<String, Object> z : OcciParser.getParser(s).attributes_attr().entrySet()) {
+        		possibleAttributes.put(z.getKey(), (String) z.getValue());
+        	}
+        }
 		
 		Publication p = new Publication(possibleAttributes);
 		logger.debug("parsed the publication: {}", 
