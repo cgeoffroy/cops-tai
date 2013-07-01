@@ -3,14 +3,17 @@ package org.tai.cops.server;
 import java.net.URI;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import javax.annotation.Nonnull;
 import javax.servlet.DispatcherType;
 
+import org.antlr.runtime.RecognitionException;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
@@ -19,11 +22,13 @@ import org.tai.cops.occi.client.Categories;
 import org.tai.cops.occi.client.Category;
 import org.tai.cops.occi.client.Publication;
 
+import com.beust.jcommander.internal.Lists;
 import com.google.inject.servlet.GuiceFilter;
 
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
+import com.sun.jersey.api.client.WebResource.Builder;
 import com.sun.jersey.api.client.filter.LoggingFilter;
 
 import fj.data.Option;
@@ -76,6 +81,41 @@ public class Main {
 		return hs.get(OcciParser.occi_categories);
 	}
 	
+	
+	private static @Nonnull List<URL> makeRequestesToLocation(URI root, Category cat, List<String> filters) {
+		URI ptionUri = root.resolve(cat.getLocation());
+		logger.debug("next location = {}", ptionUri);
+		
+		Client client = Client.create();
+		client.addFilter(new LoggingFilter(System.out));
+		
+		logger.debug("connecting to the publication category");
+		Builder b = client.resource(ptionUri).accept("text/occi").type("text/occi")
+				.header("Category", cat.getRequestFilter());
+		for (String s : filters) {
+			b = b.header("X-OCCI-Attribute", s);
+		}
+		ClientResponse response = b.get(ClientResponse.class);
+		
+		List<URL> possibleLocUrl = new ArrayList<>();
+		
+		if (response.getStatus() != 200 && !response.getHeaders().containsKey("X-OCCI-Location")) {
+			logger.error("the provider location was not found");
+			return possibleLocUrl;
+		}
+		List<String> possibleLoc = response.getHeaders().get("X-OCCI-Location");
+		for (String s : possibleLoc) {
+			try {
+				possibleLocUrl.addAll(OcciParser.getParser(s).location_values());
+			} catch (RecognitionException e) {
+				logger.error("parsing recongintion error while reading location: {}", e);
+			} catch (Exception e) {
+				logger.error("generic parsing error while reading location: {}", e);
+			}
+		}
+		return possibleLocUrl;
+	}
+	
     public static void main(String[] args) throws Exception {
     	PUBLISHER_URL = new URI("http://127.0.0.1:8086");
     	
@@ -94,7 +134,7 @@ public class Main {
         if (null == tmp || tmp.size() <= 0) {
         	logger.error("Unable to load categories from the publisher");
         }
-        
+        logger.debug("got some categories: {}", mapper.writeValueAsString(tmp));
         Category pubCat;
         {	Option<Category> oc = Categories.findCategory(tmp, "publication");
         	if (oc.isNone()) {
@@ -103,26 +143,10 @@ public class Main {
         	}
         	pubCat = oc.some();
         }
-
-		URI ptionUri = PUBLISHER_URL.resolve(pubCat.getLocation());
-		logger.debug("next location = {}", ptionUri);
+        
+        List<URL> possibleLocUrl = makeRequestesToLocation(PUBLISHER_URL, pubCat,
+        		Arrays.asList("occi.publication.where=\"marketplace\"", "occi.publication.what=\"provider\""));
 		
-		logger.debug("connecting to the publication category");
-		webResource = client.resource(ptionUri);
-		response = webResource.accept("text/occi").type("text/occi")
-				.header("Category", pubCat.getRequestFilter())
-				.header("X-OCCI-Attribute", "occi.publication.where=\"marketplace\"")
-				.header("X-OCCI-Attribute", "occi.publication.what=\"provider\"")
-				.get(ClientResponse.class);
-		if (response.getStatus() != 200 && !response.getHeaders().containsKey("X-OCCI-Location")) {
-			logger.error("the provider location was not found");
-			System.exit(1);
-		}
-		List<String> possibleLoc = response.getHeaders().get("X-OCCI-Location");
-		List<URL> possibleLocUrl = new ArrayList<>();
-		for (String s : possibleLoc) {
-			possibleLocUrl.addAll(OcciParser.getParser(s).location_values());
-		}
 		response = null;
 		for (URL u1 : possibleLocUrl) {
 			logger.debug("trying to reach provider '{}'", u1);
