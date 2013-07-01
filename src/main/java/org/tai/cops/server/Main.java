@@ -165,14 +165,18 @@ public class Main {
 		
         Publication mgrResourcesProvider = null;
 		try {
-			mgrResourcesProvider = fetch(PUBLISHER_URL, Publication.class, "publication", "provider");
+			mgrResourcesProvider = fetch(PUBLISHER_URL, "publication",
+					Arrays.asList("occi.publication.where=\"marketplace\"", "occi.publication.what=\"provider\""),
+					Publication.class);
 		} catch (Exception e) {
 			logger.error("error while looking the the Account manager", e);
 		}
 		
 		Publication mgrResourcesAccount = null;
 		try {
-			mgrResourcesAccount = fetch(PUBLISHER_URL, Publication.class, "publication", "account");
+			mgrResourcesAccount = fetch(PUBLISHER_URL, "publication",
+					Arrays.asList("occi.publication.where=\"marketplace\"", "occi.publication.what=\"account\""),
+					Publication.class);
 		} catch (Exception e) {
 			logger.error("error while looking the the Account manager", e);
 		}
@@ -180,8 +184,8 @@ public class Main {
         server.start();
     }
     
-    private static @Nullable <T extends Resource> T fetch(@Nonnull URI root, @Nonnull Class<T> t, @Nonnull String catTermName,
-    		@Nonnull String what) throws Exception {
+    private static @Nullable <T extends Resource> T fetch(@Nonnull URI root, @Nonnull String catTermName,
+    		@Nonnull List<String> filtersCatInstances, @Nonnull Class<T> t) throws Exception {
         /* we discover '/-/' on the publisher and get the categories he manage */
         List<Category> publisherCategories = loadRoot(root);
         if (null == publisherCategories || publisherCategories.size() <= 0) {
@@ -199,15 +203,12 @@ public class Main {
         	publicationCat = oc.some();
         }
         
-        List<String> filters = Arrays.asList("occi.publication.where=\"marketplace\"",
-        		"occi.publication.what=\"" + what + "\"");
-        
         /* we ask the publisher to filter his publication instances and get some candidates */
-        List<URL> possibleLocUrl = makeRequestesToLocation(root, publicationCat, filters);
+        List<URL> possibleLocUrl = makeRequestesToLocation(root, publicationCat, filtersCatInstances);
         
         Map<String, String> possibleAttributes = new HashMap<>();
         /* we fetch the first publication resource, and retrieve his 'Attribute' headers */
-        for (String s : fetchFirstResource(possibleLocUrl, publicationCat, filters).get("X-OCCI-Attribute")) {
+        for (String s : fetchFirstResource(possibleLocUrl, publicationCat, filtersCatInstances).get("X-OCCI-Attribute")) {
         	for (Entry<String, Object> z : OcciParser.getParser(s).attributes_attr().entrySet()) {
         		possibleAttributes.put(z.getKey(), (String) z.getValue());
         	}
