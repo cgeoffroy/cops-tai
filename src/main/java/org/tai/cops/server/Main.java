@@ -75,7 +75,7 @@ public class Main {
 	
 	private static List<Category> loadRoot(URI location) throws Exception {
 		Client client = buildClient();
-		WebResource webResource = client.resource(PUBLISHER_URL + "/-/");
+		WebResource webResource = client.resource(location + "/-/");
 		
 		logger.debug("connecting to location: {}", location);
 		ClientResponse response = webResource.accept("text/occi").type("text/occi")
@@ -179,6 +179,18 @@ public class Main {
 					Publication.class);
 		} catch (Exception e) {
 			logger.error("error while looking the the Account manager", e);
+		}
+		if (null == mgrResourcesAccount.getWhy()) {
+			logger.error("The component that manage the 'Account' category doesn't have a 'why' field");
+		}
+		
+		Resource mgrResourcesTmp1 = null;
+		try {
+			mgrResourcesTmp1 = fetch(mgrResourcesAccount.getWhy().toURI(), "account",
+					Arrays.asList("occi.account.name=\"accords\""),
+					Publication.class);
+		} catch (Exception e) {
+			logger.warn("error while looking the the 'accords' account instance", e);
 		}
 		
         server.start();

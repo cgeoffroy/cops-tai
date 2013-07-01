@@ -1,6 +1,8 @@
 package org.tai.cops.occi.annotations;
 
+import java.net.MalformedURLException;
 import java.net.URI;
+import java.net.URL;
 
 import javax.annotation.Nullable;
 
@@ -30,6 +32,18 @@ public abstract class Transformations {
 		@Nullable
 		public Integer apply(@Nullable String input) {
 			return Integer.parseInt(input);
+		}		
+	}
+	
+	public static final class StringToUrl implements Function<String, URL> {
+		@Override
+		@Nullable
+		public URL apply(@Nullable String input) {
+			try {
+				return new URL(input);
+			} catch (MalformedURLException e) {
+				throw new IllegalArgumentException(e);
+			}
 		}		
 	}
 

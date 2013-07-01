@@ -2,6 +2,7 @@ package org.tai.cops.occi.cords;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.Map;
 
 import javax.annotation.Nonnull;
@@ -18,8 +19,8 @@ public class Publication extends Resource {
 	private String what;
 	@Attribute(name = "occi.publication.where")
 	private String where;
-	@Attribute(name = "occi.publication.why")
-	private String why;
+	@Attribute(name = "occi.publication.why", trans = Transformations.StringToUrl.class)
+	private URL why;
 	@Attribute(name = "occi.publication.when", trans = Transformations.StringToInteger.class)
 	private Integer when;
 	@Attribute(name = "occi.publication.uptime", trans = Transformations.StringToInteger.class)
@@ -74,11 +75,11 @@ public class Publication extends Resource {
 		this.where = where;
 	}
 
-	public String getWhy() {
+	public URL getWhy() {
 		return why;
 	}
 
-	public void setWhy(String why) {
+	public void setWhy(URL why) {
 		this.why = why;
 	}
 
