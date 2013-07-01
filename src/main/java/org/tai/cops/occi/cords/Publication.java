@@ -1,4 +1,4 @@
-package org.tai.cops.occi.client;
+package org.tai.cops.occi.cords;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -8,6 +8,7 @@ import javax.annotation.Nonnull;
 
 import org.tai.cops.occi.annotations.Attribute;
 import org.tai.cops.occi.annotations.Transformations;
+import org.tai.cops.occi.client.Resource;
 
 public class Publication extends Resource {
 	

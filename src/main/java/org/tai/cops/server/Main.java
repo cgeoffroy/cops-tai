@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.servlet.DispatcherType;
 import javax.ws.rs.core.MultivaluedMap;
 
@@ -25,8 +26,8 @@ import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.tai.cops.occi.ERenderingStructures;
 import org.tai.cops.occi.client.Categories;
 import org.tai.cops.occi.client.Category;
-import org.tai.cops.occi.client.Publication;
 import org.tai.cops.occi.client.Resource;
+import org.tai.cops.occi.cords.Publication;
 
 import com.google.inject.servlet.GuiceFilter;
 
@@ -160,51 +161,18 @@ public class Main {
         root.addEventListener(new SampleConfig());
         root.addFilter(GuiceFilter.class, "/*", EnumSet.of(DispatcherType.REQUEST));
         root.addServlet(EmptyServlet.class, "/*");
-        
-        /* we discover '/-/' on the publisher and get the categories he manage */
-        List<Category> publisherCategories = loadRoot(PUBLISHER_URL);
-        if (null == publisherCategories || publisherCategories.size() <= 0) {
-        	logger.error("Unable to load categories from the publisher");
-        }
-        logger.debug("got some categories: {}", mapper.writeValueAsString(publisherCategories));
-        
-        /* we look for the 'publication' category */
-        Category publicationCat;
-        {	Option<Category> oc = Categories.findCategory(publisherCategories, "publication");
-        	if (oc.isNone()) {
-        		logger.error("Cannot find the publication category in the listing");
-    			System.exit(1);
-        	}
-        	publicationCat = oc.some();
-        }
-        
-        List<String> filters = Arrays.asList("occi.publication.where=\"marketplace\"",
-        		"occi.publication.what=\"provider\"");
-        
-        /* we ask the publisher to filter his publication instances and get some candidates */
-        List<URL> possibleLocUrl = makeRequestesToLocation(PUBLISHER_URL, publicationCat, filters);
-        
-        Map<String, String> possibleAttributes = new HashMap<>();
-        /* we fetch the first publication resource, and retrieve his 'Attribute' headers */
-        for (String s : fetchFirstResource(possibleLocUrl, publicationCat, filters).get("X-OCCI-Attribute")) {
-        	for (Entry<String, Object> z : OcciParser.getParser(s).attributes_attr().entrySet()) {
-        		possibleAttributes.put(z.getKey(), (String) z.getValue());
-        	}
-        }
+        	
 		
-		Publication mgrResourcesProvider = null;
+        Publication mgrResourcesProvider = null;
 		try {
-			/* from the parsed headers, we build a 'Publication' instance */
-			mgrResourcesProvider = new Publication(possibleAttributes);
-		} catch (RuntimeException z) {
-			logger.error("error while building the publication resource", z);
-			System.exit(1);
+			mgrResourcesProvider = fetch(PUBLISHER_URL, Publication.class, "publication", "provider");
+		} catch (Exception e) {
+			logger.error("error while looking the the Account manager", e);
 		}
-		logger.debug("parsed the publication: {}", mapper.writeValueAsString(mgrResourcesProvider));
 		
-		Resource mgrResourcesAccount = null;
+		Publication mgrResourcesAccount = null;
 		try {
-			mgrResourcesAccount = fetch(PUBLISHER_URL, Resource.class);
+			mgrResourcesAccount = fetch(PUBLISHER_URL, Publication.class, "publication", "account");
 		} catch (Exception e) {
 			logger.error("error while looking the the Account manager", e);
 		}
@@ -212,26 +180,27 @@ public class Main {
         server.start();
     }
     
-    private static <T extends Resource> T fetch(URI root, Class<T> t) throws Exception {
+    private static @Nullable <T extends Resource> T fetch(@Nonnull URI root, @Nonnull Class<T> t, @Nonnull String catTermName,
+    		@Nonnull String what) throws Exception {
         /* we discover '/-/' on the publisher and get the categories he manage */
         List<Category> publisherCategories = loadRoot(root);
         if (null == publisherCategories || publisherCategories.size() <= 0) {
         	logger.error("Unable to load categories from the publisher");
         }
-        logger.debug("got some categories: {}", mapper.writeValueAsString(publisherCategories));
+        //logger.debug("got some categories: {}", mapper.writeValueAsString(publisherCategories));
         
-        /* we look for the 'publication' category */
+        /* we look for the <what> category */
         Category publicationCat;
-        {	Option<Category> oc = Categories.findCategory(publisherCategories, "publication");
+        {	Option<Category> oc = Categories.findCategory(publisherCategories, catTermName);
         	if (oc.isNone()) {
-        		logger.error("Cannot find the publication category in the listing");
-    			System.exit(1);
+        		logger.error("Cannot find the '{}' category in the listing", catTermName);
+    			return null;
         	}
         	publicationCat = oc.some();
         }
         
         List<String> filters = Arrays.asList("occi.publication.where=\"marketplace\"",
-        		"occi.publication.what=\"provider\"");
+        		"occi.publication.what=\"" + what + "\"");
         
         /* we ask the publisher to filter his publication instances and get some candidates */
         List<URL> possibleLocUrl = makeRequestesToLocation(root, publicationCat, filters);
@@ -255,7 +224,6 @@ public class Main {
 			System.exit(2);
 		} catch (RuntimeException z) {
 			logger.error("error while building the publication resource", z);
-			System.exit(1);
 		} catch (JsonGenerationException | JsonMappingException e) {
 			logger.debug("json output error A: ", e);
 		} catch (IOException e) {
