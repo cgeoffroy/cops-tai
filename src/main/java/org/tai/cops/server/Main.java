@@ -38,6 +38,8 @@ import com.sun.jersey.api.client.WebResource.Builder;
 import com.sun.jersey.api.client.filter.LoggingFilter;
 import com.sun.jersey.core.util.MultivaluedMapImpl;
 
+import fj.P;
+import fj.P2;
 import fj.data.Option;
 
 import org.slf4j.Logger;
@@ -132,7 +134,7 @@ public class Main {
 		Client client = buildClient();
 		ClientResponse response = null;
 		for (URL u1 : locations) {
-			logger.debug("trying to reach provider '{}'", u1);
+			logger.debug("trying to reach '{}' instance at '{}'", cat.getTerm(), u1);
 			Builder b = client.resource(u1.toString()).accept("text/occi").type("text/occi")
 					.header("Category", cat.getRequestFilter());
 			for (String s : filters) {
@@ -169,7 +171,8 @@ public class Main {
 					Arrays.asList("occi.publication.where=\"marketplace\"", "occi.publication.what=\"provider\""),
 					Publication.class);
 		} catch (Exception e) {
-			logger.error("error while looking the the Account manager", e);
+			logger.error("error while looking for the Provider publication instance", e);
+			System.exit(1);
 		}
 		
 		Publication mgrResourcesAccount = null;
@@ -178,26 +181,53 @@ public class Main {
 					Arrays.asList("occi.publication.where=\"marketplace\"", "occi.publication.what=\"account\""),
 					Publication.class);
 		} catch (Exception e) {
-			logger.error("error while looking the the Account manager", e);
+			logger.error("error while looking for the Account publication instance", e);
+			System.exit(1);
 		}
 		if (null == mgrResourcesAccount.getWhy()) {
 			logger.error("The component that manage the 'Account' category doesn't have a 'why' field");
+			System.exit(1);
 		}
 		
-		Resource mgrResourcesTmp1 = null;
+		URL instanceAccountAccordsUrl = null;
+		{	List<URL> possibleLocUrl = retrieveLocations(mgrResourcesAccount.getWhy().toURI(), "account",
+				Arrays.asList("occi.account.name=\"accords\""))._2();
+			if (possibleLocUrl.size() < 1) {
+				logger.error("error while looking for the 'accords' account instance : nothing found");
+				System.exit(1);
+			} else {
+				instanceAccountAccordsUrl = possibleLocUrl.get(0);
+			}
+		}
+		
+        Publication instancePublicationOfAgreement = null;
 		try {
-			mgrResourcesTmp1 = fetch(mgrResourcesAccount.getWhy().toURI(), "account",
-					Arrays.asList("occi.account.name=\"accords\""),
+			instancePublicationOfAgreement = fetch(PUBLISHER_URL, "publication",
+					Arrays.asList("occi.publication.where=\"marketplace\"", "occi.publication.what=\"agreement\""),
 					Publication.class);
 		} catch (Exception e) {
-			logger.warn("error while looking the the 'accords' account instance", e);
+			logger.error("error while looking the the Agreement manager", e);
+			System.exit(1);
+		}
+		if (null == instancePublicationOfAgreement.getWhy()) {
+			logger.error("The component that manage the 'Agreement' category doesn't have a 'why' field");
+			System.exit(1);
+		}
+		
+		Resource instanceAgreementOfAccount = null;
+		try {
+			instanceAgreementOfAccount = fetch(instancePublicationOfAgreement.getWhy().toURI(), "agreement",
+					Arrays.asList("occi.agreement.initiator=\""+ instanceAccountAccordsUrl.toString() + "\""),
+					Resource.class);
+		} catch (Exception e) {
+			logger.warn("error while looking for the agreement instance", e);
 		}
 		
         server.start();
     }
     
-    private static @Nullable <T extends Resource> T fetch(@Nonnull URI root, @Nonnull String catTermName,
-    		@Nonnull List<String> filtersCatInstances, @Nonnull Class<T> t) throws Exception {
+    private static @Nonnull P2<Category, List<URL>> retrieveLocations(@Nonnull URI root, @Nonnull String catTermName,
+    		@Nonnull List<String> filtersCatInstances) throws Exception {
         /* we discover '/-/' on the publisher and get the categories he manage */
         List<Category> publisherCategories = loadRoot(root);
         if (null == publisherCategories || publisherCategories.size() <= 0) {
@@ -210,13 +240,23 @@ public class Main {
         {	Option<Category> oc = Categories.findCategory(publisherCategories, catTermName);
         	if (oc.isNone()) {
         		logger.error("Cannot find the '{}' category in the listing", catTermName);
-    			return null;
+    			return P.p(null, (List<URL>) new ArrayList<URL>());
         	}
         	publicationCat = oc.some();
         }
         
         /* we ask the publisher to filter his publication instances and get some candidates */
-        List<URL> possibleLocUrl = makeRequestesToLocation(root, publicationCat, filtersCatInstances);
+        return P.p(publicationCat, makeRequestesToLocation(root, publicationCat, filtersCatInstances));    	
+    }
+    
+    private static @Nullable <T extends Resource> T fetch(@Nonnull URI root, @Nonnull String catTermName,
+    		@Nonnull List<String> filtersCatInstances, @Nonnull Class<T> t) throws Exception {
+    	P2<Category, List<URL>> tupleTMp = retrieveLocations(root, catTermName, filtersCatInstances);
+    	Category publicationCat = tupleTMp._1();
+    	if (null == publicationCat) {
+    		return null;
+    	}
+    	List<URL> possibleLocUrl = tupleTMp._2();
         
         Map<String, String> possibleAttributes = new HashMap<>();
         /* we fetch the first publication resource, and retrieve his 'Attribute' headers */
