@@ -1,7 +1,5 @@
 package org.tai.cops.server;
 
-
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.util.ArrayList;
@@ -28,7 +26,6 @@ import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.filter.LoggingFilter;
 
-import fj.F;
 import fj.data.Option;
 
 import org.slf4j.Logger;

@@ -54,6 +54,7 @@ public class TestsOthers {
 		assertEquals(a1.occi, "ping.aaaa");
 		assertEquals(a2.occi, "ping.bbbb");
 		ISomeInterface si = Ee.A;
+		Assert.assertNotNull(si);
 		si = a2;
 		a1.setSaved("toto");
 		a2.saved = "riri";

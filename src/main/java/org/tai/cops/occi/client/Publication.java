@@ -9,8 +9,6 @@ import javax.annotation.Nonnull;
 import org.tai.cops.occi.annotations.Attribute;
 import org.tai.cops.occi.annotations.Transformations;
 
-import com.sun.istack.NotNull;
-
 public class Publication extends Resource {
 	
 	@Attribute(name = "occi.publication.remote")
