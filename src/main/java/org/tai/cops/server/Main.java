@@ -52,6 +52,10 @@ import occi.lexpar.OcciParser;
  */
 public class Main {
 	public static URI PUBLISHER_URL;
+	public static final String serviceName = "cops-tai";
+	public static final List<String> serviceCategories = Arrays.asList("placement");
+	public static final String serviceOperator = "accords";
+	public static URI serviceIdentity = URI.create("http://locahost:6789/");
 	
 	private static ObjectMapper mapper = new ObjectMapper();
 	
@@ -96,7 +100,7 @@ public class Main {
 	}
 	
 	
-	private static @Nonnull List<URL> makeRequestesToLocation(URI root, Category cat, List<String> filters) {
+	private static @Nonnull List<URL> makeRequestesToLocation(URI root, String method, Category cat, List<String> filters) {
 		URI ptionUri = root.resolve(cat.getLocation());
 		logger.debug("next location = {}", ptionUri);
 		
@@ -108,7 +112,16 @@ public class Main {
 		for (String s : filters) {
 			b = b.header("X-OCCI-Attribute", s);
 		}
-		ClientResponse response = b.get(ClientResponse.class);
+		ClientResponse response = null;
+		switch (method.toUpperCase()) {
+		case "POST":
+			response = b.post(ClientResponse.class);
+			break;
+		case "GET":
+		default:
+			response = b.get(ClientResponse.class);
+			break;
+		}		
 		
 		List<URL> possibleLocUrl = new ArrayList<>();
 		
@@ -174,6 +187,10 @@ public class Main {
 			logger.error("error while looking for the Provider publication instance", e);
 			System.exit(1);
 		}
+		if (null == mgrResourcesProvider.getWhy()) {
+			logger.error("The 'Publication' instance of provider doesn't have a 'why' field");
+			System.exit(1);
+		}
 		
 		Publication mgrResourcesAccount = null;
 		try {
@@ -190,7 +207,7 @@ public class Main {
 		}
 		
 		URL instanceAccountAccordsUrl = null;
-		{	List<URL> possibleLocUrl = retrieveLocations(mgrResourcesAccount.getWhy().toURI(), "account",
+		{	List<URL> possibleLocUrl = retrieveLocations(mgrResourcesAccount.getWhy().toURI(), "GET", "account",
 				Arrays.asList("occi.account.name=\"accords\""))._2();
 			if (possibleLocUrl.size() < 1) {
 				logger.error("error while looking for the 'accords' account instance : nothing found");
@@ -223,11 +240,29 @@ public class Main {
 			logger.warn("error while looking for the agreement instance", e);
 		}
 		
+		URL instanceProviderOfMyself = null;
+		{	List<URL> possibleLocUrl = retrieveLocations(mgrResourcesProvider.getWhy().toURI(), "POST", "provider",
+				Arrays.asList("occi.provider.name=\""+ serviceName +"\"", "occi.provider.price=\"\"",
+						"occi.provider.category=\""+ serviceCategories.get(0) +"\"", "occi.provider.operator=\""+ serviceOperator +"\"", 
+						"occi.provider.identity=\""+ serviceIdentity +"\""))._2();
+			if (possibleLocUrl.size() < 1) {
+				logger.error("error while registering myself as a new provider");
+				System.exit(1);
+			} else {
+				instanceProviderOfMyself = possibleLocUrl.get(0);
+			}
+		}
+		logger.debug("successfully registerd my provder at '{}'", instanceProviderOfMyself);
+		
         server.start();
     }
     
-    private static @Nonnull P2<Category, List<URL>> retrieveLocations(@Nonnull URI root, @Nonnull String catTermName,
+    private static @Nonnull P2<Category, List<URL>> retrieveLocations(@Nonnull URI root, @Nullable String method, @Nonnull String catTermName,
     		@Nonnull List<String> filtersCatInstances) throws Exception {
+    	if (null == method) {
+    		method = "GET";
+    	}
+    	
         /* we discover '/-/' on the publisher and get the categories he manage */
         List<Category> publisherCategories = loadRoot(root);
         if (null == publisherCategories || publisherCategories.size() <= 0) {
@@ -246,12 +281,12 @@ public class Main {
         }
         
         /* we ask the publisher to filter his publication instances and get some candidates */
-        return P.p(publicationCat, makeRequestesToLocation(root, publicationCat, filtersCatInstances));    	
+        return P.p(publicationCat, makeRequestesToLocation(root, method, publicationCat, filtersCatInstances));    	
     }
     
     private static @Nullable <T extends Resource> T fetch(@Nonnull URI root, @Nonnull String catTermName,
     		@Nonnull List<String> filtersCatInstances, @Nonnull Class<T> t) throws Exception {
-    	P2<Category, List<URL>> tupleTMp = retrieveLocations(root, catTermName, filtersCatInstances);
+    	P2<Category, List<URL>> tupleTMp = retrieveLocations(root, "GET", catTermName, filtersCatInstances);
     	Category publicationCat = tupleTMp._1();
     	if (null == publicationCat) {
     		return null;

@@ -90,4 +90,31 @@ public class TestsParsing {
 		assertEquals(cats.get(1).toString(), "http://127.0.0.1:8086/publication/93676c24-de2f-4731-83bd-24bc8daaf448");
 	}
 	
+	@Test
+	public void i() throws Exception {
+		String input = 
+				"Category: action; "
+				+ "scheme=\"http://scheme.compatibleone.fr/scheme/compatible#\"; "
+				+ "class=kind; "
+				+ "rel=\"http://scheme.ogf.org/occi/resource#\"; "
+				+ "attributes=\"occi.action.expression occi.action.state occi.action.type occi.action.name\"; "
+				+ "actions=\"http://scheme.compatibleone.fr/scheme/compatible/action/action#DELETE\"; "
+				+ "location=\"/action/\"";
+
+		
+		OcciParser op = OcciParser.getParser(input);
+		
+		List<Category> cats = op.category();
+		assertEquals(cats.size(), 1);
+		
+		Category cat = cats.get(0);
+		assertEquals(cat.getTerm(), "action");
+		assertEquals(cat.getScheme(), new URI("http://scheme.compatibleone.fr/scheme/compatible#"));
+		assertEquals(cat.getClaz(), "kind");
+		assertEquals(cat.getRel(), new TypeIdentifier(new URI("http://scheme.ogf.org/occi/resource#")));
+		assertEquals(cat.getAttributes(), "occi.action.expression occi.action.state occi.action.type occi.action.name");
+		assertEquals(cat.getActions(), "http://scheme.compatibleone.fr/scheme/compatible/action/action#DELETE");
+		assertEquals(cat.getLocation(), new URI("/action/"));
+	}
+	
 }

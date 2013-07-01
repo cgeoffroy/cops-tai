@@ -222,7 +222,10 @@ category_value         returns [Category cat] :
                          ;
 
 term_attr              returns [String value] :
-	                       TERM_VALUE{
+	                       CLASS_VALUE {
+	                         $value = $CLASS_VALUE.text;
+	                       }
+	                       | TERM_VALUE {
 	                         $value = $TERM_VALUE.text;
 	                       }
 	                       ;
@@ -466,7 +469,7 @@ URL           : ( 'http://' | 'https://' )( 'a'..'z' | 'A'..'Z' | '0'..'9' | '@'
 DIGITS        : ('0'..'9')* ;
 FLOAT         : ('0'..'9' | '.')* ;
 QUOTE         : '"' | '\'' ;
-TERM_VALUE    : ('a'..'z' | 'A'..'Z' | '0'..'9' | '-' | '_' | '.')* ;
+TERM_VALUE    : ('a'..'z' | 'A'..'Z' | '0'..'9' | '-' | '_' | '.')+;
 TARGET_VALUE  : ('a'..'z' | 'A'..'Z' | '0'..'9' | '/' | '-' | '_')* ;
 QUOTED_VALUE  : QUOTE ( options {greedy=false;} : . )* QUOTE ;
 WS  :   ( ' ' | '\t' | '\r' | '\n' ) {$channel=HIDDEN;} ;
