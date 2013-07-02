@@ -52,10 +52,11 @@ import occi.lexpar.OcciParser;
  */
 public class Main {
 	public static URI PUBLISHER_URL;
-	public static final String serviceName = "cops-tai";
+	public static final String serviceName = "service-cops-tai";
 	public static final List<String> serviceCategories = Arrays.asList("placement");
 	public static final String serviceOperator = "accords";
 	public static URI serviceIdentity = URI.create("http://locahost:6789/");
+	public static final String serviceZone = "europe";
 	
 	private static ObjectMapper mapper = new ObjectMapper();
 	
@@ -125,7 +126,7 @@ public class Main {
 		
 		List<URL> possibleLocUrl = new ArrayList<>();
 		
-		if (response.getStatus() != 200 && !response.getHeaders().containsKey("X-OCCI-Location")) {
+		if (response.getStatus() != 200 || !response.getHeaders().containsKey("X-OCCI-Location")) {
 			logger.error("the provider location was not found");
 			return possibleLocUrl;
 		}
@@ -252,7 +253,51 @@ public class Main {
 				instanceProviderOfMyself = possibleLocUrl.get(0);
 			}
 		}
-		logger.debug("successfully registerd my provder at '{}'", instanceProviderOfMyself);
+		logger.debug("successfully registerd my provider at '{}'", instanceProviderOfMyself);
+		
+		for (String subService : serviceCategories) {
+	        Publication publicationInstanceOfPrice = null;
+			try {
+				publicationInstanceOfPrice = fetch(PUBLISHER_URL, "publication",
+						Arrays.asList("occi.publication.where=\"marketplace\"", "occi.publication.what=\"price\""),
+						Publication.class);
+			} catch (Exception e) {
+				logger.error("error while looking for the 'price' Publication instance", e);
+				System.exit(1);
+			}
+			if (null == publicationInstanceOfPrice.getWhy()) {
+				logger.error("The 'price' Publication instance doesn't have a 'why' field");
+				System.exit(1);
+			}
+			
+			URL priceInstanceOfMyselfUrl = null;
+			{	List<URL> possibleLocUrl = retrieveLocations(publicationInstanceOfPrice.getWhy().toURI(), "GET", "price",
+					Arrays.asList("occi.price.name=\""+ subService +"\""))._2();
+				if (possibleLocUrl.size() < 1) {
+					logger.warn("error while looking for the '{}' Price instance : nothing found", subService);
+				} else {
+					priceInstanceOfMyselfUrl = possibleLocUrl.get(0);
+				}
+			}
+			// TODO : find what to do with this price
+			
+			URL publicationInstanceOfSubService = null;
+			{	List<URL> possibleLocUrl = retrieveLocations(PUBLISHER_URL, "POST", "publication",
+					Arrays.asList("occi.publication.who=\""+ serviceName +"\"", "occi.publication.pass=\"co-system\"",
+							"occi.publication.where=\"marketplace\"", "occi.publication.what=\""+ subService +"\"", 
+							"occi.publication.operator=\""+ serviceOperator +"\"", "occi.publication.zone=\""+ serviceZone +"\"",
+							"occi.publication.price=\"\"", "occi.publication.why=\""+ serviceIdentity +"\""))._2();
+				if (possibleLocUrl.size() < 1) {
+					logger.error("error while registering the '{}' Publication instance", subService);
+					System.exit(1);
+				} else {
+					publicationInstanceOfSubService = possibleLocUrl.get(0);
+				}
+			}
+			logger.debug("successfully registerd my provider at '{}'", instanceProviderOfMyself);
+		
+		}
+
 		
         server.start();
     }
