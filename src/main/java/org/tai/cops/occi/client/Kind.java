@@ -28,6 +28,12 @@ public class Kind extends Category {
 		this.entity_type = Entity.class;
 	}
 
+	@Override
+	public String getRequestFilter() {
+		return (String.format("%s; scheme=\"%s\"; class=%s; rel=\"%s\"",
+				getTerm(), getScheme(), getClaz(), getRelated()));		
+	};
+	
 	public Set<TypeIdentifier> getActions() {
 		return actions;
 	}
