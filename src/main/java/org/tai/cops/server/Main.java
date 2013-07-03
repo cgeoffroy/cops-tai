@@ -27,7 +27,7 @@ import org.tai.cops.occi.ERenderingStructures;
 import org.tai.cops.occi.client.Categories;
 import org.tai.cops.occi.client.Category;
 import org.tai.cops.occi.client.Resource;
-import org.tai.cops.occi.cords.Publication;
+import org.tai.cops.occi.cords.concepts.Publication;
 
 import com.google.inject.servlet.GuiceFilter;
 

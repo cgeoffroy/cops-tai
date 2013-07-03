@@ -16,7 +16,7 @@ import org.tai.cops.occi.client.Category;
 import org.tai.cops.occi.client.Kind;
 import org.tai.cops.occi.client.Resource;
 import org.tai.cops.occi.client.TypeIdentifier;
-import org.tai.cops.occi.cords.Publication;
+import org.tai.cops.occi.cords.concepts.Publication;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 

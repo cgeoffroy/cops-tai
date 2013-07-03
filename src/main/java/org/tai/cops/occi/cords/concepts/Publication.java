@@ -1,4 +1,4 @@
-package org.tai.cops.occi.cords;
+package org.tai.cops.occi.cords.concepts;
 
 import java.net.URI;
 import java.net.URISyntaxException;
