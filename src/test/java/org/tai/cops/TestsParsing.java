@@ -13,12 +13,14 @@ import java.util.Map;
 import occi.lexpar.OcciParser;
 
 import org.tai.cops.occi.client.Category;
+import org.tai.cops.occi.client.Kind;
 import org.tai.cops.occi.client.Resource;
 import org.tai.cops.occi.client.TypeIdentifier;
 import org.tai.cops.occi.cords.Publication;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import com.google.common.collect.Sets;
 import com.google.common.io.CharStreams;
 
 import static org.testng.Assert.assertEquals;
@@ -56,13 +58,22 @@ public class TestsParsing {
 		assertEquals(cats.size(), 1);
 		
 		Category cat = cats.get(0);
-		assertEquals(cat.getTerm(), "publication");
-		assertEquals(cat.getScheme(), new URI("http://scheme.compatibleone.fr/scheme/compatible#"));
-		assertEquals(cat.getClaz(), "kind");
-		assertEquals(cat.getRel(), new TypeIdentifier(new URI("http://scheme.ogf.org/occi/resource#")));
-		assertEquals(cat.getAttributes(), "occi.publication.rating occi.publication.what occi.publication.remote occi.publication.zone occi.publication.pid occi.publication.who occi.publication.when occi.publication.uptime occi.publication.state occi.publication.pass occi.publication.where occi.publication.why occi.publication.identity occi.publication.operator occi.publication.price");
-		assertEquals(cat.getActions(), "http://scheme.compatibleone.fr/scheme/compatible/publication/action#DELETE http://scheme.compatibleone.fr/scheme/compatible/publication/action#suspend http://scheme.compatibleone.fr/scheme/compatible/publication/action#restart");
-		assertEquals(cat.getLocation(), new URI("/publication/"));
+		Assert.assertTrue(Kind.class.isInstance(cat));
+		Kind k = (Kind) cat;
+		assertEquals(k.getTerm(), "publication");
+		assertEquals(k.getScheme(), new URI("http://scheme.compatibleone.fr/scheme/compatible#"));
+		assertEquals(k.getClaz(), "kind");
+		assertEquals(k.getRelated(), new TypeIdentifier(new URI("http://scheme.ogf.org/occi/resource#")));
+		assertEquals(k.getAttributes(), "occi.publication.rating occi.publication.what occi.publication.remote occi.publication.zone occi.publication.pid occi.publication.who occi.publication.when occi.publication.uptime occi.publication.state occi.publication.pass occi.publication.where occi.publication.why occi.publication.identity occi.publication.operator occi.publication.price");
+		assertEquals(
+				k.getActions(),
+				Sets.newHashSet(
+						new TypeIdentifier(new URI("http://scheme.compatibleone.fr/scheme/compatible/publication/action#DELETE")),
+						new TypeIdentifier(new URI("http://scheme.compatibleone.fr/scheme/compatible/publication/action#suspend")),
+						new TypeIdentifier(new URI("http://scheme.compatibleone.fr/scheme/compatible/publication/action#restart"))
+						) 
+				);
+		assertEquals(k.getLocation(), new URI("/publication/"));
 	}
 	
 	@Test
@@ -111,10 +122,31 @@ public class TestsParsing {
 		assertEquals(cat.getTerm(), "action");
 		assertEquals(cat.getScheme(), new URI("http://scheme.compatibleone.fr/scheme/compatible#"));
 		assertEquals(cat.getClaz(), "kind");
-		assertEquals(cat.getRel(), new TypeIdentifier(new URI("http://scheme.ogf.org/occi/resource#")));
 		assertEquals(cat.getAttributes(), "occi.action.expression occi.action.state occi.action.type occi.action.name");
-		assertEquals(cat.getActions(), "http://scheme.compatibleone.fr/scheme/compatible/action/action#DELETE");
 		assertEquals(cat.getLocation(), new URI("/action/"));
+		Assert.assertTrue(cat instanceof Kind);
+		Kind k = (Kind) cat;
+		assertEquals(k.getRelated(), new TypeIdentifier(new URI("http://scheme.ogf.org/occi/resource#")));
+		assertEquals(
+				k.getActions(),
+				Sets.newHashSet(
+						new TypeIdentifier(new URI("http://scheme.compatibleone.fr/scheme/compatible/action/action#DELETE"))
+						)
+				);
+	}
+	
+	@Test
+	public void j() throws Exception {
+		String input = 
+				"\"http://SCHEME.compatibleone.fr/scheme/compatible/action/action#DELETE  http://SCHEME.compatibleone.fr/scheme/compatible/action/action#super\"";
+		
+		OcciParser op = OcciParser.getParser(input);
+		
+		List<URI> uris = op.quoted_uris();
+		assertEquals(uris.size(), 2);
+		assertEquals(uris.get(0), URI.create("http://SCHEME.compatibleone.fr/scheme/compatible/action/action#DELETE"));
+		assertEquals(uris.get(1), URI.create("http://SCHEME.compatibleone.fr/scheme/compatible/action/action#super"));
+
 	}
 	
 }

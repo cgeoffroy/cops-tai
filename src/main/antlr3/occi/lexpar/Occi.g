@@ -47,6 +47,7 @@ options {
     
     import org.tai.cops.occi.client.TypeIdentifier;
     import org.tai.cops.occi.client.Category;
+    import org.tai.cops.occi.client.Kind;
 }
 
 @lexer::header {
@@ -195,9 +196,24 @@ category_values        returns [List<Category> cats] :
 
 category_value         returns [Category cat] :
 	                       term_attr scheme_attr klass_attr title_attr? rel_attr? c_attributes_attr? actions_attr? location_attr? {
-	                         $cat = new Category($term_attr.value, $scheme_attr.value, $klass_attr.value,
-	                         	$title_attr.value, $rel_attr.value, $location_attr.value,
-	                         	$c_attributes_attr.value, $actions_attr.value);
+	                         switch ($klass_attr.value) {
+	                         	case "kind":
+	                         	    $cat = new Kind($term_attr.value, $scheme_attr.value,
+	                         	    	$title_attr.value, $location_attr.value,
+	                         			$c_attributes_attr.value, $actions_attr.value,
+	                         			$rel_attr.value);
+	                         		break;
+	                         	case "action":
+	                         	case "mixin":
+	                         		$cat = new Category($term_attr.value, $scheme_attr.value,
+	                         	    	$klass_attr.value, $title_attr.value,
+	                         	    	$location_attr.value, $c_attributes_attr.value);
+	                         	    break;
+	                         	default:
+	                         	    throw (new RuntimeException(new SemanticException("Detected an invalid category class field: " + $klass_attr.value)));
+	                         }
+	                         
+	                        
 	                         
 
 	                    /*     $cat.put(occi_core_term, $term_attr.value);
@@ -279,10 +295,13 @@ c_attributes_attr      returns [String value] :
 	                       ;
 
 //this value can be passed on to the uri rule in Location for validation
-actions_attr           returns [String value] :
+actions_attr           returns [List<TypeIdentifier> value] :
 	                       ';' 'actions' '='
-	                       QUOTED_VALUE{
-	                         $value = removeQuotes($QUOTED_VALUE.text);
+	                       quoted_uris {
+	                         $value = new ArrayList<>();
+	                         for(URI u : $quoted_uris.uris) {
+	                           $value.add(new TypeIdentifier(u));
+	                         }
 	                       }
 	                       ;
 
@@ -464,12 +483,27 @@ quoted_uri    returns [URI uri]:
 	    }
 	};
 	
+quoted_uris     returns [List<URI> uris]:
+	QUOTED_VALUE {
+		try {
+			$uris = new ArrayList<>();
+			String tmp = removeQuotes($QUOTED_VALUE.text);
+			String[] z = tmp.split("( |\t)+");
+			for(String s : z) {
+				$uris.add(new URI(s));
+			}
+	    } catch (URISyntaxException z) {
+	    	throw (new RuntimeException(new SemanticException("Detected an invalid URI: " + z.toString())));
+	    }
+	};
+	
 CLASS_VALUE   : ('kind' | 'mixin' | 'action');
 URL           : ( 'http://' | 'https://' )( 'a'..'z' | 'A'..'Z' | '0'..'9' | '@' | ':' | '%' | '_' | '\\' | '+' | '.' | '~' | '#' | '?' | '&' | '/' | '=' | '-')*;
 DIGITS        : ('0'..'9')* ;
 FLOAT         : ('0'..'9' | '.')* ;
-QUOTE         : '"' | '\'' ;
+QUOTE         : ('"'|'\'') ;
 TERM_VALUE    : ('a'..'z' | 'A'..'Z' | '0'..'9' | '-' | '_' | '.')+;
 TARGET_VALUE  : ('a'..'z' | 'A'..'Z' | '0'..'9' | '/' | '-' | '_')* ;
 QUOTED_VALUE  : QUOTE ( options {greedy=false;} : . )* QUOTE ;
 WS  :   ( ' ' | '\t' | '\r' | '\n' ) {$channel=HIDDEN;} ;
+
