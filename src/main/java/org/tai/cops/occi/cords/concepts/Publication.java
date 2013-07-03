@@ -9,7 +9,9 @@ import javax.annotation.Nonnull;
 
 import org.tai.cops.occi.annotations.Attribute;
 import org.tai.cops.occi.annotations.Transformations;
+import org.tai.cops.occi.client.Kind;
 import org.tai.cops.occi.client.Resource;
+import org.tai.cops.occi.client.TypeIdentifier;
 
 public class Publication extends Resource {
 	
@@ -43,12 +45,12 @@ public class Publication extends Resource {
 	private Integer state;
 
 
-	protected Publication(@Nonnull URI id, String title, String summary) {
-		super(id, title, summary);
+	protected Publication(@Nonnull TypeIdentifier kind, @Nonnull URI id, String title, String summary) {
+		super(kind, id, title, summary);
 	}
 	
-	public Publication(Map<String, String> attributes) throws URISyntaxException {
-		super(attributes);
+	public Publication(@Nonnull TypeIdentifier kind, Map<String, String> attributes) throws URISyntaxException {
+		super(kind, attributes);
 	}
 
 	public String getRemote() {

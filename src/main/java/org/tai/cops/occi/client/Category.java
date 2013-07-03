@@ -61,5 +61,8 @@ public class Category {
 		return attributes;
 	}
 
+	public TypeIdentifier toTypeIdentifier() {
+		return new TypeIdentifier(URI.create(scheme + term));
+	}
 	
 }

@@ -31,7 +31,7 @@ public class TestsParsing {
 		HashMap<String, String> m = new HashMap<>();
 		m.put("occi.core.id", "http://www.truc.machin:465");
 		m.put("occi.core.summary", "un petit résumé");
-		Resource r = new Resource(m);
+		Resource r = new Resource(new TypeIdentifier(URI.create("http//foo#bar")), m);
 		
 		assertEquals(r.getId(), new URI("http://www.truc.machin:465"));
 		assertEquals(r.getSummary(), "un petit résumé");
@@ -39,7 +39,7 @@ public class TestsParsing {
 	
 	@Test(expectedExceptions=RuntimeException.class, expectedExceptionsMessageRegExp="the '.*' field is mandatory")
 	public void b() throws URISyntaxException {
-		new Publication(new HashMap<String, String>());
+		new Publication(new TypeIdentifier(URI.create("http//foo#bar")), new HashMap<String, String>());
 	}
 	
 	@Test

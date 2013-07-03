@@ -27,6 +27,7 @@ import org.tai.cops.occi.ERenderingStructures;
 import org.tai.cops.occi.client.Categories;
 import org.tai.cops.occi.client.Category;
 import org.tai.cops.occi.client.Resource;
+import org.tai.cops.occi.client.TypeIdentifier;
 import org.tai.cops.occi.cords.concepts.Publication;
 
 import com.google.inject.servlet.GuiceFilter;
@@ -349,7 +350,7 @@ public class Main {
 		T mgrResourcesProvider = null;
 		try {
 			/* from the parsed headers, we build a 'Publication' instance */
-			mgrResourcesProvider = t.getConstructor(Map.class).newInstance(possibleAttributes);
+			mgrResourcesProvider = t.getConstructor(TypeIdentifier.class, Map.class).newInstance(publicationCat.toTypeIdentifier(), possibleAttributes);
 			logger.debug("parsed the resource: {}", mapper.writeValueAsString(mgrResourcesProvider));
 		} catch (InstantiationException | IllegalAccessException | InvocationTargetException 
     			| NoSuchMethodException z) {

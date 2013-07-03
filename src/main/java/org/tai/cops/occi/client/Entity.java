@@ -23,12 +23,16 @@ public abstract class Entity {
 	@Attribute(name = "occi.core.title")
 	private String title;
 	
-	protected Entity(@Nonnull URI id, String title) {
+	private final TypeIdentifier kind; // not discoverable
+	
+	protected Entity(@Nonnull TypeIdentifier kind, @Nonnull URI id, String title) {
+		this.kind = kind;
 		this.id = id;
 		this.title = title;
 	}
 	
-	protected Entity(Map<String, String> attributes) throws URISyntaxException {
+	protected Entity(@Nonnull TypeIdentifier kind, Map<String, String> attributes) throws URISyntaxException {
+		this.kind = kind;
 		Class<?> c = this.getClass();
 		while (! Entity.class.getSuperclass().equals(c)) {
 			for (Field f : c.getDeclaredFields()) {
@@ -73,6 +77,10 @@ public abstract class Entity {
 
 	public URI getId() {
 		return id;
+	}
+
+	public TypeIdentifier getKind() {
+		return kind;
 	}
 	
 }
