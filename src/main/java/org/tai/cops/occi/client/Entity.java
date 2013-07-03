@@ -6,6 +6,11 @@ import java.net.URISyntaxException;
 import java.util.Map;
 
 import javax.annotation.Nonnull;
+import javax.persistence.Column;
+import javax.persistence.Id;
+import javax.persistence.Inheritance;
+import javax.persistence.InheritanceType;
+import javax.persistence.Transient;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,14 +20,19 @@ import org.tai.cops.occi.enums.EMultiplicity;
 
 import com.google.common.base.Function;
 
+@javax.persistence.Entity @Inheritance(strategy=InheritanceType.TABLE_PER_CLASS)
 public abstract class Entity {
 	private final static Logger logger = LoggerFactory.getLogger(Entity.class);
 	
+	@Id
 	@Attribute(name = "occi.core.id", multiplicity = EMultiplicity.ONE, trans = Transformations.StringToUri.class)
 	private URI id;
+	
+	@Column
 	@Attribute(name = "occi.core.title")
 	private String title;
 	
+	@Transient
 	private final TypeIdentifier kind; // not discoverable
 	
 	protected Entity(@Nonnull TypeIdentifier kind, @Nonnull URI id, String title) {

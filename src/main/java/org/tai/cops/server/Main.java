@@ -4,6 +4,10 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
 import java.net.URL;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumSet;
@@ -23,12 +27,15 @@ import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
+import org.hibernate.Session;
+import org.tai.cops.concepts.Placement;
 import org.tai.cops.occi.ERenderingStructures;
 import org.tai.cops.occi.client.Categories;
 import org.tai.cops.occi.client.Category;
 import org.tai.cops.occi.client.Resource;
 import org.tai.cops.occi.client.TypeIdentifier;
 import org.tai.cops.occi.cords.concepts.Publication;
+import org.tai.cops.server.persistence.HibernateUtils;
 
 import com.google.inject.servlet.GuiceFilter;
 
@@ -67,7 +74,7 @@ public class Main {
 		return client;
 	}
 	
-	private static String rebuildOcciHeaders(Map<String, List<String>> headers) {
+	public static String rebuildOcciHeaders(Map<String, List<String>> headers) {
 		StringBuilder buffer = new StringBuilder();
 		for (Entry<String, List<String>> i_elt : headers.entrySet()) {
 			ERenderingStructures ers = ERenderingStructures.fromHttpHeader(i_elt.getKey());
@@ -179,7 +186,16 @@ public class Main {
         root.addFilter(GuiceFilter.class, "/*", EnumSet.of(DispatcherType.REQUEST));
         root.addServlet(EmptyServlet.class, "/*");
         	
-		
+        
+        Session session = HibernateUtils.getSessionFactory().openSession();
+        
+        session.beginTransaction();
+        Placement stock = new Placement(Placement.identifyBy, URI.create("7896542123"), "a title", "a summary", "a great name");
+ 
+        session.save(stock);
+        session.getTransaction().commit();
+        session.close();
+        
         Publication mgrResourcesProvider = null;
 		try {
 			mgrResourcesProvider = fetch(PUBLISHER_URL, "publication",
