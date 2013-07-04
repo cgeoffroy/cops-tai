@@ -11,6 +11,7 @@ import org.tai.cops.server.resources.BenchResource;
 import org.tai.cops.server.resources.JacksonResource;
 import org.tai.cops.server.resources.PlacementResource;
 import org.tai.cops.server.resources.SampleResource;
+import org.tai.cops.server.resources.cats.ProvidedCategories;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -34,6 +35,7 @@ public class SampleConfig extends GuiceServletContextListener {
                 bind(SampleResource.class);
                 bind(JacksonResource.class);
                 bind(PlacementResource.class);
+                bind(ProvidedCategories.class);
 
                 /* bind jackson converters for JAXB/JSON serialization */
                 bind(MessageBodyReader.class).to(JacksonJsonProvider.class);

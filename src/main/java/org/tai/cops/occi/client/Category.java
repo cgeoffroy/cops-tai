@@ -1,8 +1,13 @@
 package org.tai.cops.occi.client;
 
 import java.net.URI;
+import java.util.Arrays;
+import java.util.List;
 
 import javax.annotation.Nonnull;
+
+import fj.P;
+import fj.P2;
 
 
 public class Category {
@@ -29,6 +34,43 @@ public class Category {
 	public String getRequestFilter() {
 		return (String.format("%s; scheme=\"%s\"; class=%s",
 					getTerm(), getScheme(), getClaz()));
+	}
+	
+	private List<P2<String, String>> toLittleOcciRenderParts() {
+		List<P2<String, String>> l = Arrays.asList(
+				P.p("scheme", getScheme().toString()),
+				P.p("class", getClaz())
+				);
+		return l;
+	}
+	
+	protected List<P2<String, String>> toExtraOcciRenderParts() {
+		List<P2<String, String>> l = Arrays.asList(
+				P.p("title", getTitle()),
+				P.p("location", getLocation().toString()),
+				P.p("attributes", getAttributes())
+				);
+		return l;
+	}
+	
+	private P2<String, String> toLowLevelOcciRendering(List<P2<String, String>> arg) {
+		StringBuilder res = new StringBuilder();
+		res.append(getTerm());
+		for (P2<String, String> x : arg) {
+			if (null != x._2())
+				res.append("; ").append(x._1()).append("=\"").append(x._2()).append("\"");
+		}
+		return P.p("Category", res.toString());
+	}
+	
+	public P2<String, String> toFullOcciRendering() {
+		List<P2<String, String>> tmp = toLittleOcciRenderParts();
+		tmp.addAll(toExtraOcciRenderParts());
+		return toLowLevelOcciRendering(tmp);
+	}
+	
+	public P2<String, String> toLittleOcciRendering() {
+		return toLowLevelOcciRendering(toLittleOcciRenderParts());
 	}
 	
 

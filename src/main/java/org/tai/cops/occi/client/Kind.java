@@ -11,6 +11,9 @@ import javax.annotation.Nullable;
 
 import com.google.common.collect.Sets;
 
+import fj.P;
+import fj.P2;
+
 public class Kind extends Category {
 
 	private final @Nonnull Set<TypeIdentifier> actions;
@@ -40,6 +43,26 @@ public class Kind extends Category {
 
 	public TypeIdentifier getRelated() {
 		return related;
+	}
+	
+	@Override
+	protected List<P2<String, String>> toExtraOcciRenderParts() {
+		List<P2<String, String>> l = Arrays.asList(
+				P.p("title", getTitle()),
+				P.p("rel", getRelated().org.toString()),
+				P.p("location", getLocation().toString()),
+				P.p("attributes", getAttributes())
+				);
+		StringBuilder actionsList = new StringBuilder();
+		int count = 0;
+		for(TypeIdentifier act : actions) {
+			count++;
+			if (count > 1)
+				actionsList.append(" ");
+			actionsList.append(act.org.toString());
+		}
+		l.add(P.p("actions", actionsList.toString()));
+		return l;
 	}
 
 }
