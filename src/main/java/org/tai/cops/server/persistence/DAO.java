@@ -1,5 +1,6 @@
 package org.tai.cops.server.persistence;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -50,6 +51,22 @@ public class DAO {
 				tmp.add((Placement) o);
 		}
 		return tmp;
+	}
+	
+	public static Placement findById(URI id) {
+		Placement tmp = null;
+		Session session = null;
+		try {
+			session = HibernateUtils.getSessionFactory().openSession();
+			tmp = (Placement) session.get(Placement.class, id);		
+		} catch (HibernateException e) {
+			logger.error("error while searching for a Placement by name", e);
+		} finally {
+			if (null != session)
+				session.close();
+		}
+		return tmp;
+			
 	}
 	
 }
