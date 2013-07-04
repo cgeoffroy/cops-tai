@@ -77,7 +77,7 @@ public class Placement extends Resource {
 		super(kind, attributes);
 	}
 
-
+	private Placement() { }
 
 	
 

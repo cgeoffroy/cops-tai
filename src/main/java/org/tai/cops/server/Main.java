@@ -187,15 +187,6 @@ public class Main {
         root.addServlet(EmptyServlet.class, "/*");
         	
         
-        Session session = HibernateUtils.getSessionFactory().openSession();
-        
-        session.beginTransaction();
-        Placement stock = new Placement(Placement.identifyBy, URI.create("7896542123"), "a title", "a summary", "a great name");
- 
-        session.save(stock);
-        session.getTransaction().commit();
-        session.close();
-        
         Publication mgrResourcesProvider = null;
 		try {
 			mgrResourcesProvider = fetch(PUBLISHER_URL, "publication",

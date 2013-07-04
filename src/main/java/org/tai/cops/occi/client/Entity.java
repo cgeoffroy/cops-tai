@@ -77,6 +77,10 @@ public abstract class Entity {
 		}
 	}
 
+	protected Entity() {
+		this.kind = null;
+	}
+	
 	public String getTitle() {
 		return title;
 	}

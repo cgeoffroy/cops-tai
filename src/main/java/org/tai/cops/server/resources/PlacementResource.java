@@ -22,6 +22,7 @@ import org.antlr.runtime.RecognitionException;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.hibernate.Session;
 import org.tai.cops.concepts.Placement;
+import org.tai.cops.server.persistence.DAO;
 import org.tai.cops.server.persistence.HibernateUtils;
 
 @Path("/placement")
@@ -48,11 +49,7 @@ public class PlacementResource {
         try {
         	Placement p = new Placement(Placement.identifyBy, possibleAttributes);
         	
-            Session session = HibernateUtils.getSessionFactory().openSession();          
-            session.beginTransaction();
-            session.save(p);
-            session.getTransaction().commit();
-            session.close();
+        	DAO.save(p);
             
            	result = result.status(201).entity("OK" + " " + new ObjectMapper().writeValueAsString(p));
         } catch (URISyntaxException | RuntimeException z) {
