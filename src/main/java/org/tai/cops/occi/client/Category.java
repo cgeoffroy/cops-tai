@@ -4,6 +4,7 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 
 import javax.annotation.Nonnull;
 
@@ -19,11 +20,11 @@ public class Category {
 	
 	private final String title;
 	private final URI location;
-	private final String attributes;
+	private final Set<String> attributes;
 	
 	
 	public Category(@Nonnull String term, @Nonnull URI scheme, @Nonnull String claz,
-			String title, URI location, String attributes) {
+			String title, URI location, Set<String> attributes) {
 		this.term = term;
 		this.scheme = scheme;
 		this.claz = claz;
@@ -100,7 +101,7 @@ public class Category {
 	}
 
 
-	public String getAttributes() {
+	public Set<String> getAttributes() {
 		return attributes;
 	}
 

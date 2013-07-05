@@ -14,6 +14,8 @@ import org.tai.cops.occi.client.Category;
 import org.tai.cops.occi.client.Kind;
 import org.tai.cops.occi.client.TypeIdentifier;
 
+import com.google.common.collect.Sets;
+
 import fj.P2;
 
 @Path("/-/")
@@ -24,7 +26,7 @@ public class ProvidedCategories {
 	private final static Kind placementKind =
 			new Kind("placement", URI.create("http://schemas.tai.org/infrastructure#"), "Placement category",
 					URI.create("/placement"),
-					"occi.placement.name",
+					Sets.newHashSet("occi.placement.name"),
 					Arrays.asList(new TypeIdentifier(URI.create("http://schemas.tai.org/infrastructure/placement/action#choose"))),
 					new TypeIdentifier(URI.create("http://schemas.ogf.org/occi/core#resource")));
 	

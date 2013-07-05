@@ -64,7 +64,15 @@ public class TestsParsing {
 		assertEquals(k.getScheme(), new URI("http://scheme.compatibleone.fr/scheme/compatible#"));
 		assertEquals(k.getClaz(), "kind");
 		assertEquals(k.getRelated(), new TypeIdentifier(new URI("http://scheme.ogf.org/occi/resource#")));
-		assertEquals(k.getAttributes(), "occi.publication.rating occi.publication.what occi.publication.remote occi.publication.zone occi.publication.pid occi.publication.who occi.publication.when occi.publication.uptime occi.publication.state occi.publication.pass occi.publication.where occi.publication.why occi.publication.identity occi.publication.operator occi.publication.price");
+		assertEquals(k.getAttributes(), Sets.newHashSet(
+											"occi.publication.rating", "occi.publication.what",
+											"occi.publication.remote", "occi.publication.zone",
+											"occi.publication.pid", "occi.publication.who",
+											"occi.publication.when", "occi.publication.uptime",
+											"occi.publication.state", "occi.publication.pass",
+											"occi.publication.where", "occi.publication.why",
+											"occi.publication.identity", "occi.publication.operator",
+											"occi.publication.price"));
 		assertEquals(
 				k.getActions(),
 				Sets.newHashSet(
@@ -122,7 +130,8 @@ public class TestsParsing {
 		assertEquals(cat.getTerm(), "action");
 		assertEquals(cat.getScheme(), new URI("http://scheme.compatibleone.fr/scheme/compatible#"));
 		assertEquals(cat.getClaz(), "kind");
-		assertEquals(cat.getAttributes(), "occi.action.expression occi.action.state occi.action.type occi.action.name");
+		assertEquals(cat.getAttributes(), Sets.newHashSet("occi.action.expression", "occi.action.state",
+		                                                  "occi.action.type", "occi.action.name"));
 		assertEquals(cat.getLocation(), new URI("/action/"));
 		Assert.assertTrue(cat instanceof Kind);
 		Kind k = (Kind) cat;

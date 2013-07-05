@@ -33,7 +33,8 @@ options {
 
 @header {
     package occi.lexpar;
-    import java.util.List;
+	import java.util.List;
+	import java.util.Set;
     import java.util.Map;
     import java.util.HashMap;
     import java.util.ArrayList;
@@ -48,6 +49,8 @@ options {
     import org.tai.cops.occi.client.TypeIdentifier;
     import org.tai.cops.occi.client.Category;
     import org.tai.cops.occi.client.Kind;
+    
+	import com.google.common.collect.Sets;
 }
 
 @lexer::header {
@@ -287,10 +290,10 @@ location_attr          returns [URI value] :
 	                       ;
 
 //these value once extracted can be passed on to the attributes_attr rule
-c_attributes_attr      returns [String value] :
+c_attributes_attr      returns [Set<String> value] :
 	                       ';' 'attributes' '='
-	                       QUOTED_VALUE{
-	                         $value = removeQuotes($QUOTED_VALUE.text);
+	                       quoted_values {
+	                         $value = $quoted_values.vs;
 	                       }
 	                       ;
 
@@ -473,6 +476,13 @@ location_values        returns [List<URL> urls]
 	                       	
 	                       	}
 	                       ;
+
+quoted_values	returns [Set<String> vs]:
+	QUOTED_VALUE {
+		String tmp = removeQuotes($QUOTED_VALUE.text);
+		String[] z = tmp.split("( |\t)+");
+		vs = Sets.newHashSet(z);
+	};
 
 quoted_uri    returns [URI uri]:
 	QUOTED_VALUE {

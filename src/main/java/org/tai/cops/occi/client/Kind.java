@@ -24,7 +24,7 @@ public class Kind extends Category {
 	//private final @Nonnull Set<Entity> entities; //TODO : how to handle this ?
 	
 	public Kind(@Nonnull String term, @Nonnull URI scheme, String title,
-			URI location, String attributes, List<TypeIdentifier> actions, @Nullable TypeIdentifier rel) {
+			URI location, Set<String> attributes, List<TypeIdentifier> actions, @Nullable TypeIdentifier rel) {
 		super(term, scheme, "kind", title, location, attributes);
 		this.actions = Sets.newHashSet();
 		if (null != actions)
