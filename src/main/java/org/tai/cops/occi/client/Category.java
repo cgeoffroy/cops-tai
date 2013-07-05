@@ -1,6 +1,7 @@
 package org.tai.cops.occi.client;
 
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -37,10 +38,10 @@ public class Category {
 	}
 	
 	private List<P2<String, String>> toLittleOcciRenderParts() {
-		List<P2<String, String>> l = Arrays.asList(
+		List<P2<String, String>> l = new ArrayList<>(Arrays.asList(
 				P.p("scheme", getScheme().toString()),
 				P.p("class", getClaz())
-				);
+				));
 		return l;
 	}
 	

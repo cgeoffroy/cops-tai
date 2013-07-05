@@ -1,6 +1,7 @@
 package org.tai.cops.occi.client;
 
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -9,6 +10,7 @@ import java.util.Set;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
 import fj.P;
@@ -47,12 +49,12 @@ public class Kind extends Category {
 	
 	@Override
 	protected List<P2<String, String>> toExtraOcciRenderParts() {
-		List<P2<String, String>> l = Arrays.asList(
+		List<P2<String, String>> l = new ArrayList<>(Arrays.asList(
 				P.p("title", getTitle()),
 				P.p("rel", getRelated().org.toString()),
 				P.p("location", getLocation().toString()),
 				P.p("attributes", getAttributes())
-				);
+				));
 		StringBuilder actionsList = new StringBuilder();
 		int count = 0;
 		for(TypeIdentifier act : actions) {
